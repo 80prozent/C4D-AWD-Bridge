@@ -1,0 +1,62 @@
+// C4D-DialogResource
+
+DIALOGSTRINGS MAINDIALOG
+{
+    //main dialog 
+    MAINDIALOG_STR                 		"AWD Exporter";
+    
+	
+    BTN_EXPORT        					"Export";
+    BTN_CANCEL        					"Cancel";
+	
+    CBOX_SELECTEDONLY        			"Export Selected Objects only";
+    CBOX_UNUSEDMATS        				"Export Unused Materials";
+	CBOX_CLOSEAFTEREXPORT				"Close After Export";
+	CBOX_COMPRESSED						"Compress Data";
+	CBOX_ANIMATION						"";
+	CBOX_STREAMING						"Enable Streaming";
+	CBOX_DEBUG							"Debug";
+	CBOX_COPYTEX						"Copy Textures to Output-Folder";
+	CBOX_OBJECTCOLORS					"Create Materials for Object-Colors";
+	
+	
+	STATUSMESSAGE							"Status = ";
+	STATUSMESSAGE1							"Ready !";
+	STATUSMESSAGE2							"Analyze C4d-Scene!";
+	STATUSMESSAGE3							"Error Occured!";
+	
+	ERRORMESSAGE  						"An error occured while exporting !";
+	ERRORMESSAGE1  						"No Object Selected";
+	ERRORMESSAGE2  						"Cannot export empty Scene";
+	
+	REAL_SCALE_STR		 				"Scale: ";
+	REAL_FIRSTFRAME_STR					"First Frame: ";
+	REAL_LASTFRAME_STR					"Last Frame: ";
+	
+	
+	GRP_MESHSETTINGS					"Mesh";
+	GRP_ANIMATIONSETTINGS				"Animation";
+	GRP_GENERALSETTINGS					"General";
+	GRP_FILTER							"Filter";
+	GRP_LIGHTSETTINGS					"Lights";
+	GRP_AFTEREXPORT						"After Export";
+	GRP_EXPORTSETTINGS					"Export Settings";
+	GRP_TEXTURES						"Textures";
+
+
+	
+    COMBOITEM_EMBED    					"Embed JPG/PNG Data";
+    COMBOITEM_EXTERNPATH    			"External Files";
+    COMBO_TEXTURESMODE_STR    			"Textures: ";
+    LINK_EXTERNTEXTURESPATH_STR    		"Textures URL: ";
+
+	COMBO_RANGE_STR						"Range: ";
+	COMBO_RANGE_DOC    					"Document";
+	COMBO_RANGE_PREVIEW   				"Preview";
+	COMBO_RANGE_CUSTOM    				"Custom";
+	
+	
+	
+	
+	
+}

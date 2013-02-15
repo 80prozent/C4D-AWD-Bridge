@@ -1,0 +1,159 @@
+DIALOG MAINDIALOG
+{
+    NAME MAINDIALOG_STR;    
+    
+    GROUP
+    {
+        BORDERSIZE 4,4,4,4;
+        
+        CENTER_H;
+        
+        COLUMNS 1;
+        SCALE_H; 
+        GROUP
+        {
+			NAME GRP_GENERALSETTINGS;
+            COLUMNS 5;
+            SCALE_H; 
+				GROUP
+				{
+					COLUMNS 1;
+				SIZE 30,0;}
+			GROUP
+			{
+				COLUMNS 1;
+				SCALE_H; 
+					SCALE_V; 
+					BORDERSIZE 14, 0, 14, 0; 
+				
+				GROUP
+				{
+					COLUMNS 2;
+					SCALE_V; 
+					SCALE_H;
+					
+					STATICTEXT REAL_SCALE_STR { NAME REAL_SCALE_STR;SIZE 60, 0; }
+					EDITNUMBERARROWS REAL_SCALE {SIZE 60, 0;SCALE_H; }				
+					
+				}
+				GROUP
+				{
+					COLUMNS 1;
+					SCALE_H; 	
+					CHECKBOX CBOX_UNUSEDMATS { NAME CBOX_UNUSEDMATS; }
+					CHECKBOX CBOX_SELECTEDONLY { NAME CBOX_SELECTEDONLY; }	
+					CHECKBOX CBOX_OBJECTCOLORS { NAME CBOX_OBJECTCOLORS; }		
+				}
+			}          
+
+				GROUP
+				{
+					COLUMNS 1;
+				SCALE_H; 	}
+			GROUP
+			{
+				COLUMNS 1;
+				BORDERSIZE 14, 0, 14, 0; 
+			  
+				CHECKBOX CBOX_STREAMING { NAME CBOX_STREAMING; }
+				CHECKBOX CBOX_COMPRESSED { NAME CBOX_COMPRESSED; }
+				
+				CHECKBOX CBOX_DEBUG { NAME CBOX_DEBUG; }
+				CHECKBOX CBOX_CLOSEAFTEREXPORT { NAME CBOX_CLOSEAFTEREXPORT; }				
+				}
+				GROUP
+				{
+					COLUMNS 1;
+				SIZE 30,0;	}
+			}   
+
+			
+        }
+
+
+		        GROUP
+				{
+					NAME GRP_TEXTURES;
+					COLUMNS 1;
+					SCALE_H; 
+				BORDERSIZE 14, 0, 14, 0; 
+					
+		        GROUP
+				{
+					COLUMNS 1;
+					SCALE_H; 
+					BORDERSIZE 14, 0, 14, 0; 
+					GROUP
+					{
+						SCALE_H; 
+						COLUMNS 3;
+						STATICTEXT COMBO_TEXTURESMODE_STR { NAME COMBO_TEXTURESMODE_STR;SIZE 150, 0;}
+						COMBOBOX COMBO_TEXTURESMODE {ALIGN_TOP; ALIGN_LEFT;SCALE_H; CHILDS 
+										{
+											0, COMBOITEM_EMBED;
+											1, COMBOITEM_EXTERNPATH;
+										} } 
+						
+						GROUP
+						{
+						SCALE_H;  }		 
+					}
+					
+					
+				}
+				}   
+        GROUP
+        {
+			NAME GRP_ANIMATIONSETTINGS;
+            COLUMNS 1;
+            SCALE_H; 
+				BORDERSIZE 14, 0, 14, 0; 
+			
+			
+			GROUP
+			{
+				COLUMNS 7;
+				SCALE_H; 
+				BORDERSIZE 14, 0, 14, 0; 
+
+				CHECKBOX CBOX_ANIMATION { NAME CBOX_ANIMATION; }
+				STATICTEXT COMBO_RANGE_STR { NAME COMBO_RANGE_STR; }
+				COMBOBOX COMBO_RANGE {ALIGN_TOP; ALIGN_LEFT;SIZE 150, 0; CHILDS 
+						{
+									0, COMBO_RANGE_DOC;
+									1, COMBO_RANGE_PREVIEW;
+									2, COMBO_RANGE_CUSTOM;
+								} }  
+				STATICTEXT REAL_FIRSTFRAME_STR { NAME REAL_FIRSTFRAME_STR; }
+				EDITNUMBERARROWS REAL_FIRSTFRAME { SCALE_H; }
+				STATICTEXT REAL_LASTFRAME_STR { NAME REAL_LASTFRAME_STR; }
+				EDITNUMBERARROWS REAL_LASTFRAME { SCALE_H; }
+			}
+		}	
+		
+        GROUP
+        {
+			SCALE_H; 
+			BORDERSIZE 14, 0, 14, 0; 
+			USERAREA  MAINDIALOG_USERAREA  
+			{
+				SIZE 150, 30;
+				SCALE_H; 
+			}
+		}	
+        GROUP
+        {
+            COLUMNS 2;
+            SCALE_H; 
+			BORDERSIZE 14, 0, 14, 0; 
+          
+            BUTTON BTN_EXPORT { NAME BTN_EXPORT;SIZE 150, 30;SCALE_H; }
+            BUTTON BTN_CANCEL { NAME BTN_CANCEL;SIZE 150, 30;SCALE_H; }
+            
+            
+        }
+  
+        SEPARATOR { SCALE_H; }
+    
+    }
+}

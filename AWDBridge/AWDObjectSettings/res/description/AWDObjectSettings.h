@@ -1,0 +1,29 @@
+#ifndef _AWDObjectSettings_H_
+#define _AWDObjectSettings_H_
+
+enum
+{		
+	DAPE_APPLYTOCHILDS			= 1016,
+	DAPE_EXPORT  				= 1014,
+	DAPE_SELECTION  			= 1012,
+	DAPE_LIGHTS  				= 1013,
+	DAPE_UV  				 	= 1015,
+	DAPE_NORMALS  				= 1017,
+	DAPE_TRIANGULATE 			= 1018,
+	DAPE_OPTIMIZE 				= 1019,
+	DAPE_SENDCALL  				= 1000,
+	DAPE_TOOLGROUP				= 1001,
+	DAPE_TOOL 					= 1002,
+	DAPE_MOVE					= 0,
+	DAPE_ROTATE					= 1,
+	DAPE_COMBOID					= 2,
+	DAPE_TOOL_ANIMATION			= 1005,
+	DAPE_NOANIMATION			= 0,
+	DAPE_ANIMATION			= 1,
+	DAPE_ANIMATIONONLY		= 2,
+	DAPE_TOOLID					= 1003,
+	DAPE_OBJECTSETTINGS			= 1004,
+	
+};
+
+#endif
