@@ -1,14 +1,12 @@
 C4D-AWD-Bridge
 ==============
 
-<<<<<<< HEAD
 A collection of plug-ins for Cinema 4D, that allow importing and exporting of AWD2 files for use with the Away3D engine.
 =======
 A collection of plugins for Cinema 4D, that allow importing and exporting of AWD2 files for use with the Away3D engine.
 
 Disclaimer: 
 
- - Copyright 2013 80prozent
  - Use at your own risk.
  - This code is WIP (Work In Progress)
 
