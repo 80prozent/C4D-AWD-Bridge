@@ -3,19 +3,10 @@ import c4d
 from awdexporter import ids
 from awdexporter.maindialog import MainDialog    
 
-
-def PluginMessage(id, data):
-    #print str(id)+" / "+str(data)
-    if id==c4d.C4DPL_COMMANDLINEARGS:
-        
-        return True
-
-    return False
 # this class is the basic plugin
 class CMDData(c4d.plugins.CommandData):
     
-    __dialog = None
-    
+    __dialog = None    
     
     # we could also just execute some code here - the dialog is optional 
     def Execute(self, doc):

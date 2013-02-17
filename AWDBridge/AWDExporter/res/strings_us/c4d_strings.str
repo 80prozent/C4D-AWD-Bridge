@@ -3,8 +3,6 @@
 STRINGTABLE
 {
     STR_TITLE                   	"AWDExporter";
-    MAINDIALOG_NONEFOUND_STR   		"Found no HyperNURBS objects in this scene";
-    MAINDIALOG_ASKCLOSE_STR     	"Do you really want to close Smart HN-Options?";
     MENU_PRESET      				"Presets";
     MENU_PRESET_LOAD        		"Load";
     MENU_PRESET_SAVE        		"Save";
@@ -15,7 +13,7 @@ STRINGTABLE
 
 	SUCCESSMESSAGE  						"The Scene was exportet successfully.\nFor more Details look into the Script-Console ";
 	
-	ERRORMESSAGEOBJ  							"Invalide Object: ";
+	ERRORMESSAGEOBJ  						"Invalide Object: ";
 	ERRORMESSAGE  							"An error occured while exporting !";
 	ERRORMESSAGE1  							"No Object Selected";
 	ERRORMESSAGE2  							"Cannot export empty Scene";
@@ -33,4 +31,6 @@ STRINGTABLE
 	STATUSMESSAGE4							"Convert Animations";
 	STATUSMESSAGE5							"Convert Meshes";
 	STATUSMESSAGE6							"Write AWD2-File";
+	
+	STRING_80PRO					"2013 by 80prozent@differentdesign.de";
 }

@@ -12,7 +12,6 @@ from awdimporter import ids
 from awdimporter import cmddata
 from awdimporter import maindialog
 
-# make the GeResource object available to modules which need 
 #access to the *.res or *.str files
 maindialog.__res__ = __res__
 

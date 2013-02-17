@@ -1,0 +1,39 @@
+// C4D-DialogResource
+
+DIALOGSTRINGS MAINDIALOG
+{
+    //main dialog 
+    MAINDIALOG_STR                 		"AWD Importer";
+    
+	BTN_IMPORT							"Importieren";
+	
+	REAL_SCALE_STR		 				"Groeße: ";
+	REAL_SCALE_JOINTS_STR		 		"Groeße Skelett: ";
+	REAL_FPS_STR						"FPS: ";
+
+	GRP_SKELETONANIMATIONS            	"Skelett Animation";
+	GRP_SKELETONANIMATIONSROOT         	"Root Objekt";
+	GRP_TEXTURES            			"Texturen";
+	GRP_GENERAL            				"Allgemein";
+	
+	CBOX_SKEL_ANIM_TRANSLATIONS		 	"Translation";
+	CBOX_SKEL_ANIM_SCALE			 	"Scale";
+	CBOX_SKEL_ROOT_ANIM_TRANSLATIONS	"Translation on Root";
+	CBOX_SKEL_ROOT_ANIM_SCALE			"Scale on Root";
+	CBOX_SKEL_TPOSERETARGET				"Morph tag fuer Skelette erstellen";
+	CBOX_DEBUG							"Debug";
+	CBOX_CLOSEAFTER						"Nach dem Importieren schliessen";
+	
+	
+	COMBO_EXTERNTEXTURESPATH_STR		"Pfad zu externen Texturen:";
+	COMBO_EMBEDTEXTRESPATH_STR			"Eingebundene Texturen hier speichern:";
+	
+
+	COMBOITEM_GLOBAL					"Globaler C4D Ordner";
+	COMBOITEM_AWDFILE					"AWD Datei Ordner";
+	COMBOITEM_C4DFILE					"C4D Projekt Ordner";
+	COMBOITEM_C4DFILETEX				"C4D Projekt Ordner/tex";
+	COMBOITEM_OTHER						"Anderer";
+	
+	STRING_80PRO					"2013 by 80prozent@differentdesign.de";
+}

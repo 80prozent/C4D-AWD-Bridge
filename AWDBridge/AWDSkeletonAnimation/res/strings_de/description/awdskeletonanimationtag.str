@@ -1,0 +1,15 @@
+STRINGTABLE AWDSkeletonAnimationTag
+{
+	AWDSkeletonAnimationTag	"AWDSkeletonAnimationTag";
+			
+	AWDSKELETON_EXPORT  		"Exportieren";
+	AWDSKELETON_NAME  			"Skeleton Animation Name";
+	AWDSKELETON_EXPORTRANGE  	"Export Bereich";
+	AWDSKELETON_FIRSTFRAME  	"Erster Frame";
+	AWDSKELETON_LASTFRAME  		"Letzter Frame";
+	AWDSKELETON_RANGEGLOBAL  	"Global";
+	AWDSKELETON_RANGEDOC  		"Dokument";
+	AWDSKELETON_RANGEPREV  		"Vorschau";
+	AWDSKELETON_RANGECUSTOM  	"Eigener Bereich";
+	
+}

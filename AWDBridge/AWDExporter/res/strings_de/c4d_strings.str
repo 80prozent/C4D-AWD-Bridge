@@ -1,0 +1,36 @@
+// C4D-StringResource
+
+STRINGTABLE
+{
+    STR_TITLE                   	"AWDExporter";
+    MENU_PRESET      				"Presets";
+    MENU_PRESET_LOAD        		"Laden";
+    MENU_PRESET_SAVE        		"Speichern";
+    MENU_ABOUT        				"?";
+    MENU_ABOUT_HELP        			"Hilfe";
+    MENU_ABOUT_ABOUT       			"Ueber";
+    BTN_EXPORT        				"Exportieren";
+
+	SUCCESSMESSAGE  						"Die Szene wurde erfolgreich exportiert.\nÖffnen Sie die Skript-Konsole für mehr Deteils";
+	
+	ERRORMESSAGEOBJ  						"Invalide Object: ";
+	ERRORMESSAGE  						"Waehrend dem Exportieren ist ein Fehler aufgetreten !";
+	ERRORMESSAGE1  						"Kein Selektiertes Objekt gefunden";
+	ERRORMESSAGE2  						"Leere Scene kann nicht exportiert werden!";
+	ERRORMESSAGE3  							"Die einzigen unterstuetzten Bild-Formate sind 'jpg' und 'png'!";
+	ERRORMESSAGE4  							"Konnte eine Textur nicht finden! \nStellen sie sicher das der Datei-Pfad dieser texture 'absolut' oder relativ zu dem C4D-Projekt-ordner angegeben ist. Sollten sie nicht sicher sein, Fuehren sie die Funktion 'Datei->Projekt inkl Bestandteile speichern' aus. Das neu gespeicherte Dokument sollte sich nun im Hinblick auf Texturen problemlos exportieren lassen.!";
+	
+	WARNINGMESSAGE  						"Warnung: Der Export verlief nicht einfandfrei!!!";
+	WARNINGMESSAGE1  						"Materialien-Typ nicht unterstuetzt";
+	WARNINGMESSAGE2  						"Leere Scene kann nicht exportiert werden!";
+	
+	STATUSMESSAGE							"Status = ";
+	STATUSMESSAGE1							"Sie muessen ihr Projekt speichern, um dieses Plugin nutzen zu können!";
+	STATUSMESSAGE2							"Bereit!";
+	STATUSMESSAGE3							"Erstelle alle AWDBloecke";
+	STATUSMESSAGE4							"Konvertiere Animationen";
+	STATUSMESSAGE5							"Konvertiere Meshes";
+	STATUSMESSAGE6							"Erstelle AWD2-Datei";
+	
+	STRING_80PRO					"2013 by 80prozent@differentdesign.de";
+}

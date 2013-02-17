@@ -1,0 +1,10 @@
+STRINGTABLE AWDSkeletonTag
+{
+	AWDSkeletonTag	"AWDSkeletonTag";
+			
+	AWDSKELETON_EXPORT  	"Exportieren";
+	AWDSKELETON_NAME  		"Skeleton Name";
+	AWDSKELETON_EXPORTSCENEOBJECTS  	"Exportiere Joints als Objekte (ObjectContainer3D)";
+	AWDSKELETON_WRONOBJECTTYPE  	"Das Skeleton Tag kann nur einem 'Joint'-Objekt zugeweisen werden!";
+	
+}

@@ -2,14 +2,14 @@ STRINGTABLE AWDSkeletonAnimationTag
 {
 	AWDSkeletonAnimationTag	"AWDSkeletonAnimationTag";
 			
-	AWDSKELETON_EXPORT  	"Export";
-	AWDSKELETON_NAME  		"Skeleton Animation Name";
+	AWDSKELETON_EXPORT  		"Export";
+	AWDSKELETON_NAME  			"Skeleton Animation Name";
 	AWDSKELETON_EXPORTRANGE  	"Export Range";
 	AWDSKELETON_FIRSTFRAME  	"First Frame";
 	AWDSKELETON_LASTFRAME  		"Last Frame";
-	AWDSKELETON_RANGEGLOBAL  		"Global";
+	AWDSKELETON_RANGEGLOBAL  	"Global";
 	AWDSKELETON_RANGEDOC  		"Document";
 	AWDSKELETON_RANGEPREV  		"Preview";
-	AWDSKELETON_RANGECUSTOM  		"Custom";
+	AWDSKELETON_RANGECUSTOM  	"Custom";
 	
 }

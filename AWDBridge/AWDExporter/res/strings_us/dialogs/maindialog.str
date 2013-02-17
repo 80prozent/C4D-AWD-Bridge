@@ -55,6 +55,7 @@ DIALOGSTRINGS MAINDIALOG
 	COMBO_RANGE_PREVIEW   				"Preview";
 	COMBO_RANGE_CUSTOM    				"Custom";
 	
+	STRING_80PRO					"2013 by 80prozent@differentdesign.de";
 	
 	
 	
