@@ -85,33 +85,40 @@ class MainDialog(c4d.gui.GeDialog):
         if doc==None:
             statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
             self.userarea.draw([statusStr,0,0])
+            c4d.EventAdd()
             return
         if doc!=None:
             if doc.GetDocumentPath()==None or doc.GetDocumentPath()=="":
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
                 self.userarea.draw([statusStr,0,0])
+                c4d.EventAdd()
                 return
             if exportData==None:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE2)
                 self.userarea.draw([statusStr,0,0])
+                c4d.EventAdd()
                 return
             if exportData.status==0:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE3)
                 self.userarea.draw([statusStr,0,0])
+                c4d.EventAdd()
                 return
             curPercent=float(float(exportData.allStatus)/float(exportData.allStatusLength))
             c4d.StatusSetBar(curPercent)
             if exportData.status==1:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE4)+"  "+str(int(curPercent*100))+" %"
-                self.userarea.draw([statusStr,curPercent,0])                   
+                self.userarea.draw([statusStr,curPercent,0])      
+                c4d.EventAdd()             
                 return
             if exportData.status==2:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE5)+"  "+str(int(curPercent*100))+" %"
                 self.userarea.draw([statusStr,curPercent,float(exportData.subStatus)])
+                c4d.EventAdd()
                 return
             if exportData.status==3:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE6)+"  "+str(int(curPercent*100))+" %"
                 self.userarea.draw([statusStr,curPercent,0])
+                c4d.EventAdd()
                 return
     def CoreMessage(self, msg, result):
         self.updateCanvas()
@@ -173,8 +180,33 @@ class MainDialog(c4d.gui.GeDialog):
             c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
             c4d.EventAdd(c4d.EVENT_ANIMATE) 
             maindialogHelpers.enableAll(self,True)
+            print c4d.plugins.GeLoadString(ids.SUCCESSMESSAGE)
             self.SetTimer(0)
-            
+       
+    def printErrors(self):  
+        global exportData
+        if len(exportData.AWDerrorObjects)>0:  
+            maindialogHelpers.enableAll(self,True)
+            newMessage=c4d.plugins.GeLoadString(ids.ERRORMESSAGE)+"\n"
+            for errorMessage in exportData.AWDerrorObjects:
+                newMessage+=c4d.plugins.GeLoadString(errorMessage.errorID)
+                if errorMessage.errorData!=None:
+                    newMessage+="\n\n"+str(c4d.plugins.GeLoadString(ids.ERRORMESSAGEOBJ))+" = "+str(errorMessage.errorData)
+            c4d.gui.MessageDialog(newMessage)
+            exportData=None
+            if self.GetBool(ids.CBOX_CLOSEAFTEREXPORT) == True:  
+                exportData=None
+                c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
+                c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
+                c4d.EventAdd(c4d.EVENT_ANIMATE) 
+                self.Close()
+            c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
+            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
+            c4d.EventAdd(c4d.EVENT_ANIMATE)  
+            exportData=None  
+            return False   
+        return True
+
     def Command(self, id, msg):  
         global workerThread,exportData
              
@@ -198,6 +230,7 @@ class MainDialog(c4d.gui.GeDialog):
                 c4d.gui.MessageDialog(newMessage)
                 return True
             exportData=mainExporter.startExport(self) 
+            self.printErrors() 
             if exportData!=None:
                 workerThread  = WorkerThread()
                 workerThread.Start() 

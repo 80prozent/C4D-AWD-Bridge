@@ -206,7 +206,7 @@ def parseMeshInstanceBlock(body,block,sceneData):
     meshObjectID=struct.unpack('I', body.read(4))[0]
     meshInstance=sceneData.geoDic.get(str(meshObjectID),None)
     if meshInstance==None:
-        print "No Mesh found = "+str(len(sceneData.geoDic))+"!!!"
+        #print "No Mesh found = "+str(len(sceneData.geoDic))+"!!!"
         matlength=0
         while matlength<struct.unpack('H', body.read(2))[0]:
             struct.unpack('I', body.read(4))[0]
@@ -290,45 +290,45 @@ def parseStandartMaterialBlock(body,block,sceneData):
     newMaterial.SetName(newStandartMaterialBlock.name)
     #newMaterial[c4d.MATERIAL_COLOR_SHADER][c4d.BITMAPSHADER_FILENAME]="shit"
 	
-    print "MaterialName  =  "+str(newStandartMaterialBlock.name)
-    print "MaterialType  =  "+str(newStandartMaterialBlock.MatType)
-    print "Material numShaders  =  "+str(newStandartMaterialBlock.numShaders)
+    #print "MaterialName  =  "+str(newStandartMaterialBlock.name)
+    #print "MaterialType  =  "+str(newStandartMaterialBlock.MatType)
+    #print "Material numShaders  =  "+str(newStandartMaterialBlock.numShaders)
     length=struct.unpack('I', body.read(4))[0]
-    print "Material Attributes length (bytes)  =  "+str(length)
+    #print "Material Attributes length (bytes)  =  "+str(length)
     
     attributecount=0
     while attributecount<length:
 		attributeID = struct.unpack('H', body.read(2))[0]
-		print "Attribute ID = "+str(attributeID)
+		#print "Attribute ID = "+str(attributeID)
 		attributeLength =  struct.unpack('I', body.read(4))[0]
-		print "Attribute Length = "+str(attributeLength)
+		#print "Attribute Length = "+str(attributeLength)
 		if attributeID==1:
 			colorR=struct.unpack('B', body.read(1))[0]
 			colorG=struct.unpack('B', body.read(1))[0]
 			colorB=struct.unpack('B', body.read(1))[0]
 			colorA=struct.unpack('B', body.read(1))[0]
-			print newMaterial[c4d.MATERIAL_COLOR_COLOR]
+			#print newMaterial[c4d.MATERIAL_COLOR_COLOR]
 			newMaterial[c4d.MATERIAL_COLOR_COLOR]=c4d.Vector(float(float(colorB)/255),float(float(colorG)/255),float(float(colorR)/255))
 			
-			print "Attribute Value  R = "+str( colorR)+"   attributeNr: "+str(attributecount)
-			print "Attribute Value G = "+str( colorG)
-			print "Attribute Value B = "+str( colorB)
-			print "Attribute Value A = "+str( colorA)
+			#print "Attribute Value  R = "+str( colorR)+"   attributeNr: "+str(attributecount)
+			#print "Attribute Value G = "+str( colorG)
+			#print "Attribute Value B = "+str( colorB)
+			#print "Attribute Value A = "+str( colorA)
 		elif  attributeID==2:
 			textureID=struct.unpack('I', body.read(4))[0]
-			print "Attribute Value textureID = "+str( textureID)
+			#print "Attribute Value textureID = "+str( textureID)
 		elif  attributeID==11:
 			alphaBlending=struct.unpack('B', body.read(1))[0]
-			print "Attribute Value AlphaBlending = "+str( alphaBlending)
+			#print "Attribute Value AlphaBlending = "+str( alphaBlending)
 		elif  attributeID==12:
 			alphaThreshold=struct.unpack('f', body.read(4))[0]
-			print "Attribute Value alphaThreshold = "+str( alphaThreshold)
+			#print "Attribute Value alphaThreshold = "+str( alphaThreshold)
 		elif  attributeID==13:
 			repeat=struct.unpack('B', body.read(1))[0]
-			print "Attribute Value repeat = "+str( repeat)
+			#print "Attribute Value repeat = "+str( repeat)
 		else:
-			print "skipped conent = "+str(struct.unpack('I', body.read(4))[0])
-			print "Skipped unknown Attribute nr."+str(attributecount)+" type: "+str(attributeID)+" bytelength = "+str(attributeLength)
+			pass#print "skipped conent = "+str(struct.unpack('I', body.read(4))[0])
+			#print "Skipped unknown Attribute nr."+str(attributecount)+" type: "+str(attributeID)+" bytelength = "+str(attributeLength)
 		attributecount += 6+attributeLength
     
 	
@@ -344,9 +344,9 @@ def parseStandartMaterialBlock(body,block,sceneData):
     if newStandartMaterialBlock.MatType==2:
 		textureBlock=sceneData.texDic.get(str(textureID),None)
 		if textureBlock==None:
-			print "No TextureBlock found  "+str(textureID)
+			pass#print "No TextureBlock found  "+str(textureID)
 		if textureBlock!=None:
-			print "parsed: Texture applied to Material ID = "+str(textureID)
+			#print "parsed: Texture applied to Material ID = "+str(textureID)
 			shdr_texture = c4d.BaseList2D(c4d.Xbitmap)          #Create a bitmap shader in memory
 			shdr_texture[c4d.BITMAPSHADER_FILENAME] = textureBlock.filePath #Assign the path to the texture image to your shader 
 			newMaterial[c4d.MATERIAL_COLOR_SHADER]= shdr_texture        #Assign the shader to the color channel in memory only
@@ -594,12 +594,11 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
 					prevObj=parentObj.GetDownLast()
 				doc.InsertObject(newHirarchy,parentObj,prevObj)
 				newHirarchy.SetName(newSkeletonAnimationBlock.name)
-				if sceneData.skeletonTPoseRetarget==True:
-					sceneData.lastSkeleton.hasRetargetTag=sceneData.lastSkeleton.jointList[0].MakeTag(1024237)  
-					sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_HIERARCHY]=True
-					sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_P]=True
-					sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_R]=True
-				
+				sceneData.lastSkeleton.hasRetargetTag=sceneData.lastSkeleton.jointList[0].MakeTag(1024237)  
+				sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_HIERARCHY]=True
+				sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_P]=True
+				sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_R]=True
+					
          
    
             newHirarchy.SetEditorMode(c4d.MODE_OFF)
@@ -632,13 +631,13 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
                 createTrackCounter+=1
                 
         if poseBlock==None:
-            print "SkeletonAnimation could not find the skeletonPoseBlock nr "+str(framesDone)+" id "+str(poseID)
+            pass#print "SkeletonAnimation could not find the skeletonPoseBlock nr "+str(framesDone)+" id "+str(poseID)
         if poseBlock!=None:
             if isinstance(poseBlock.blockDataObject,awdBlocks.SkeletonPoseBlock)==False: 
-                print "SkeletonAnimation could find the poseBlock nr "+str(framesDone)+" id "+str(poseID)+" but it is not a SkeletonPoseBlock"
+                pass#print "SkeletonAnimation could find the poseBlock nr "+str(framesDone)+" id "+str(poseID)+" but it is not a SkeletonPoseBlock"
             if isinstance(poseBlock.blockDataObject,awdBlocks.SkeletonPoseBlock)==True: 
                 if len(sceneData.latestjointList)>poseBlock.blockDataObject.numJoints:
-                    print "Found more Transformation-Matrixes in the SkeletonPose "+str(poseID)+" than there are available in the Skeleton"
+                    pass#print "Found more Transformation-Matrixes in the SkeletonPose "+str(poseID)+" than there are available in the Skeleton"
                 if len(sceneData.latestjointList)>=poseBlock.blockDataObject.numJoints:
                     dataCount=0
                     jointCount=0
@@ -712,7 +711,7 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
 							
 
                         if poseBlock.blockDataObject.transformations[dataCount]==0:
-                            print "no matrix for this joint"
+                            #print "no matrix for this joint"
 
                             dataCount+=1
                             

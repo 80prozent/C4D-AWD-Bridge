@@ -71,9 +71,6 @@ def importAWD(mainDialog):
 		if sceneData.texturesEmbedPathMode==3:
 			sceneData.texturesEmbedPath=mainDialog.GetString(ids.LINK_EMBEDTEXTRESPATH)
 		sceneData.magicString=f.read(3)
-		
-
-
 
 		if sceneData.magicString!="AWD":
 			sceneData.errorMessages.append("The Magicstring is not 'AWD'!")
@@ -98,10 +95,6 @@ def importAWD(mainDialog):
 				sceneData.errorMessages.append("LZMA Compression is not supported by this Importer!")
 				return
 				
-			
-			
-			
-			#print "Fuckkkkkk   "+str(struct.unpack('I', newBody.read(4))[0])
 			byteCounter=0
 			newBody.seek(0, 2)
 			newBodyLength=newBody.tell()

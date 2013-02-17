@@ -21,7 +21,7 @@ def createSkeletonBlocks(objList,exportData,mainDialog):
             createSkeletonBlocks(object.GetChildren(),exportData,mainDialog)
 
 def buildSkeletonAnimation(exportData,curObj,mainDialog):   
-    print "Build Skeleton Animation ###################"
+    #print "Build Skeleton Animation ###################"
     minFrame=curObj.GetTag(1028938)[1013]
     maxFrame=curObj.GetTag(1028938)[1014]
     curFrame=minFrame
@@ -52,20 +52,20 @@ def buildSkeletonAnimation(exportData,curObj,mainDialog):
 
 def buildSkeletonAnimationBlock(exportData,curObj,durationList,idList):   
     newAWDBlock=classesAWDBlocks.SkeletonAnimationBlock(exportData.idCounter,0,curObj.GetTag(1028938)[1011],len(durationList))
-    exportData.IDsToclassesAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
-    exportData.allclassesAWDBlocks.append(newAWDBlock)
+    exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
+    exportData.allAWDBlocks.append(newAWDBlock)
     newAWDBlock.name=curObj.GetTag(1028938)[1011]
     newAWDBlock.tagForExport=True
     newAWDBlock.framesDurationsList=durationList
     newAWDBlock.framesIDSList=idList
-    print "sgsgsgsgsg "+str(len(idList))
+    #print "sgsgsgsgsg "+str(len(idList))
     exportData.idCounter+=1
     exportData.allSkeletonAnimations.append(newAWDBlock)
 
 def buildSkeletonPose(exportData,curObj,curTime):   
     newAWDBlock=classesAWDBlocks.SkeletonPoseBlock(exportData.idCounter,0,curObj.GetTag(1028938)[1011])
-    exportData.IDsToclassesAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
-    exportData.allclassesAWDBlocks.append(newAWDBlock)
+    exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
+    exportData.allAWDBlocks.append(newAWDBlock)
     newAWDBlock.name=curObj.GetTag(1028938)[1011]
     exportData.idCounter+=1
     newAWDBlock.tagForExport=True
@@ -85,8 +85,8 @@ def buildJointTransform(curObjList,jointTransforms):
 
 def buildSkeleton(exportData,curObj):
     newAWDBlock=classesAWDBlocks.SkeletonBlock(exportData.idCounter,0,curObj.GetTag(1028937)[1011],curObj)
-    exportData.IDsToclassesAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
-    exportData.allclassesAWDBlocks.append(newAWDBlock)
+    exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
+    exportData.allAWDBlocks.append(newAWDBlock)
     exportData.allSkeletonBlocks.append(newAWDBlock)
     newAWDBlock.name=curObj.GetTag(1028937)[1011]
     newAWDBlock.tagForExport=True
@@ -106,7 +106,7 @@ def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,newAWDBlock):
         newJoint=classesAWDBlocks.jointBlock((len(jointList)+1),parentID2,jointObj)
         exportData.jointIDstoJointBlocks[str(jointObj.GetName())]=newJoint
         parentID2=(len(jointList)+1)
-        newJoint.lookUpName=exportData.IDsToclassesAWDBlocksDic[jointObj.GetName()].name
+        newJoint.lookUpName=exportData.IDsToAWDBlocksDic[jointObj.GetName()].name
         newJoint.transMatrix=jointObj.GetMg().__invert__()
         jointList.append(newJoint)
         if len(jointObj.GetChildren())>0:

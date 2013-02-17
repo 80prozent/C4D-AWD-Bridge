@@ -92,7 +92,7 @@ def resetAllObjects(objList=None):
                         for track in morphtag.GetCTracks():
                             curve = track.GetCurve()
                             if curve.GetKeyCount()==0:
-                               print "skipped morphpose"
+                               pass#print "skipped morphpose"
                             if curve.GetKeyCount()>0:
                                curve.GetKey(0).SetValue(curve,0.0)
         resetAllObjects(curObj.GetChildren())

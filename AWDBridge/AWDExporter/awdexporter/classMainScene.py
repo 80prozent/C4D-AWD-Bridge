@@ -4,11 +4,14 @@
 
 
 import c4d
+import os
+
 
 from awdexporter import ids
 from awdexporter import mainParseObjectToAWDBlock
 from awdexporter import classesAWDBlocks
-from awdexporter import mainHelpers
+from awdexporter import mainHelpers 
+from awdexporter import classesHelper 
 
 class mainScene(object):
     def __init__(self, name=None,mainDialog=None,fps=None):
@@ -226,7 +229,7 @@ class mainScene(object):
                         newAWDBlock.saveMatType=2
                         newAWDBlock.saveMatProps.append(2)
                         newAWDBlock.saveColorTextureID=colorTexBlock.blockID
-            print "material build: awdBlockid= "+str(material[c4d.MATERIAL_TRANSPARENCY_BRIGHTNESS])
+            #print "material build: awdBlockid= "+str(material[c4d.MATERIAL_TRANSPARENCY_BRIGHTNESS])
             self.idCounter+=1
 
     def createSingleTextureBlock(self,texturePath):
@@ -250,7 +253,7 @@ class mainScene(object):
                 filenamecount+=1
 
             if extension!="jpg" and extension!="jpeg" and extension!="JPG" and extension!="JPEG" and extension!="png" and extension!="PNG":
-                self.AWDerrorObjects.append(AWDerrorObject(ids.ERRORMESSAGE3,texturePath))
+                self.AWDerrorObjects.append(classesHelper.AWDerrorObject(ids.ERRORMESSAGE3,texturePath))
                 return
             inDocumentPath=texturePath
             try:
@@ -264,7 +267,7 @@ class mainScene(object):
                         inDocumentPath=os.path.join(c4d.documents.GetActiveDocument().GetDocumentPath(),"tex",texturePath)
                         with open(inDocumentPath) as f: pass
                     except IOError as e:
-                        self.AWDerrorObjects.append(AWDerrorObject(ids.ERRORMESSAGE4,inDocumentPath))
+                        self.AWDerrorObjects.append(classesHelper.AWDerrorObject(ids.ERRORMESSAGE4,inDocumentPath))
                         return
             texturefile=open(str(inDocumentPath),"rb")
             if self.embedTextures==0:
@@ -276,7 +279,7 @@ class mainScene(object):
         if exportUnusedMats==True:
             for mat in self.allc4dMaterials:
                 if str(mat.GetTypeName())!="Mat":
-                    newWarning=AWDerrorObject(ids.WARNINGMESSAGE1,mat.GetName())
+                    newWarning=classesHelper.AWDerrorObject(ids.WARNINGMESSAGE1,mat.GetName())
                     self.AWDwarningObjects.append(newWarning)
                 if str(mat.GetTypeName())=="Mat":
                     self.allUsedc4dMaterials.append(mat)

@@ -26,28 +26,6 @@ def startExport(mainDialog):
     mainSkeletonReader.createSkeletonBlocks(exportData.objList,exportData,mainDialog) 
     exportData.status=2  
     mainDialog.updateCanvas()
-    if len(exportData.AWDerrorObjects)>0:  
-        maindialogHelpers.enableAll(mainDialog,True)
-        newMessage=c4d.plugins.GeLoadString(ids.ERRORMESSAGE)+"\n"
-        for errorMessage in exportData.AWDerrorObjects:
-            newMessage+=c4d.plugins.GeLoadString(errorMessage.errorID)
-            if errorMessage.errorData!=None:
-                newMessage+="\n\n"+str(c4d.plugins.GeLoadString(ids.ERRORMESSAGEOBJ))+" = "+str(errorMessage.errorData)
-        c4d.gui.MessageDialog(newMessage)
-        exportData=None
-        if mainDialog.GetBool(ids.CBOX_CLOSEAFTEREXPORT) == True:  
-            exportData=None
-            c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-            c4d.EventAdd(c4d.EVENT_ANIMATE) 
-            mainDialog.Close()
-            exportData=None  
-            return exportData
-        c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-        c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-        c4d.EventAdd(c4d.EVENT_ANIMATE)  
-        exportData=None  
-        return exportData  
     return exportData         
               
       

@@ -43,7 +43,7 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
     
         if curObj.GetType() == c4d.Oinstance:
             if curObj[c4d.INSTANCEOBJECT_LINK].GetType()!=c4d.Opolygon:
-                print "Instance objects are only allowed to point to Mesh objects"
+                #print "Instance objects are only allowed to point to Mesh objects"
                 if len(curObj.GetChildren())==0:
                     return False, False
             if curObj[c4d.INSTANCEOBJECT_LINK].GetType()==c4d.Opolygon:
@@ -108,9 +108,9 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
                 skeletonTag=curObj.GetTag(1028937)
     
                 if skeletonTag[1010]!=False:
-                    print "Found SkeletonTag"
+                    pass#print "Found SkeletonTag"
                 if skeletonTag[1014]==False:
-                    print "Do not export Skeleton as SceneObjects"
+                    #print "Do not export Skeleton as SceneObjects"
                     tagForExport=False
                     returner= True
     
@@ -118,7 +118,7 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
                 skeletonAnimationTag=curObj.GetTag(1028938)
                 if skeletonAnimationTag[1010]!=False:
                     exportData.animationCounter+=1
-                    print "Build SkeletonAnimation"
+                    #print "Build SkeletonAnimation"
                 return False, False
     
     

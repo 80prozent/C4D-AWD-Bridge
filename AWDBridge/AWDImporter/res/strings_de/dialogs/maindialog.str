@@ -7,8 +7,8 @@ DIALOGSTRINGS MAINDIALOG
     
 	BTN_IMPORT							"Importieren";
 	
-	REAL_SCALE_STR		 				"Groeße: ";
-	REAL_SCALE_JOINTS_STR		 		"Groeße Skelett: ";
+	REAL_SCALE_STR		 				"Groesse: ";
+	REAL_SCALE_JOINTS_STR		 		"Groesse Skelett: ";
 	REAL_FPS_STR						"FPS: ";
 
 	GRP_SKELETONANIMATIONS            	"Skelett Animation";
@@ -30,8 +30,8 @@ DIALOGSTRINGS MAINDIALOG
 	
 
 	COMBOITEM_GLOBAL					"Globaler C4D Ordner";
-	COMBOITEM_AWDFILE					"AWD Datei Ordner";
-	COMBOITEM_C4DFILE					"C4D Projekt Ordner";
+	COMBOITEM_AWDFILE					"Gleiche Ordner wie importierte Datei";
+	COMBOITEM_C4DFILE					"Gleiche Ordner wie C4D Projekt-Datei";
 	COMBOITEM_C4DFILETEX				"C4D Projekt Ordner/tex";
 	COMBOITEM_OTHER						"Anderer";
 	

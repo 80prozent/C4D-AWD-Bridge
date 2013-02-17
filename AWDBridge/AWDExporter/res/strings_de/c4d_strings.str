@@ -11,7 +11,7 @@ STRINGTABLE
     MENU_ABOUT_ABOUT       			"Ueber";
     BTN_EXPORT        				"Exportieren";
 
-	SUCCESSMESSAGE  						"Die Szene wurde erfolgreich exportiert.\nÖffnen Sie die Skript-Konsole für mehr Deteils";
+	SUCCESSMESSAGE  						"Die Szene wurde erfolgreich als 'awd'-Datei gespeichert.";
 	
 	ERRORMESSAGEOBJ  						"Invalide Object: ";
 	ERRORMESSAGE  						"Waehrend dem Exportieren ist ein Fehler aufgetreten !";
@@ -25,7 +25,7 @@ STRINGTABLE
 	WARNINGMESSAGE2  						"Leere Scene kann nicht exportiert werden!";
 	
 	STATUSMESSAGE							"Status = ";
-	STATUSMESSAGE1							"Sie muessen ihr Projekt speichern, um dieses Plugin nutzen zu können!";
+	STATUSMESSAGE1							"Sie muessen ihr Projekt speichern, um dieses Plugin nutzen zu koennen!";
 	STATUSMESSAGE2							"Bereit!";
 	STATUSMESSAGE3							"Erstelle alle AWDBloecke";
 	STATUSMESSAGE4							"Konvertiere Animationen";

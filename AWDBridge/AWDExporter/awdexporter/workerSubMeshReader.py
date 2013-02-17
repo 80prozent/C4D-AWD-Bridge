@@ -27,7 +27,7 @@ def prepareSubmeshIndexe(meshBlock):
             unselectedIndexe.append(1) 
     meshBlock.saveSubMeshes[0].selectionIndexe=unselectedIndexe
     if hasUnselectedPolys==False:
-        print "delete first submehs"
+        #print "delete first submehs"
         meshBlock.saveSubMeshes.pop(0)
     return   
                            

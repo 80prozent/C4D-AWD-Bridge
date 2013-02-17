@@ -278,7 +278,7 @@ class TextureBlock(BaseBlock):
 
         textureBlockBytes+=struct.pack("< I",len(self.saveTextureProps))
         textureBlockBytes+=struct.pack("< I",len(self.saveTextureAtts))
-        print "external texture2"
+        #print "external texture2"
         return baseBlockBytes+struct.pack("< I",int(len(textureBlockBytes)))+textureBlockBytes
 
 class CubeTextureBlock(BaseBlock):
