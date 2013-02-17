@@ -188,6 +188,15 @@ class MainDialog(c4d.gui.GeDialog):
             maindialogHelpers.enableAll(self,True)
             return True
         if id == ids.BTN_EXPORT:
+            doc=c4d.documents.GetActiveDocument()
+            if doc==None:
+                newMessage=c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
+                c4d.gui.MessageDialog(newMessage)
+                return True
+            if doc.GetDocumentPath()==None or doc.GetDocumentPath()=="":
+                newMessage=c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
+                c4d.gui.MessageDialog(newMessage)
+                return True
             exportData=mainExporter.startExport(self) 
             if exportData!=None:
                 workerThread  = WorkerThread()

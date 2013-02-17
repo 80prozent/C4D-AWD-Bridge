@@ -13,15 +13,6 @@ from awdexporter import maindialogHelpers
 
 # first function called by "maindialog.py" to start the exportprocess
 def startExport(mainDialog):
-    doc=c4d.documents.GetActiveDocument()
-    if doc==None:
-        newMessage=c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
-        c4d.gui.MessageDialog(newMessage)
-        return True
-    if doc.GetDocumentPath()==None or doc.GetDocumentPath()=="":
-        newMessage=c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
-        c4d.gui.MessageDialog(newMessage)
-        return True
     maindialogHelpers.enableAll(mainDialog,False)
     
     doc=c4d.documents.GetActiveDocument()
