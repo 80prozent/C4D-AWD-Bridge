@@ -85,40 +85,33 @@ class MainDialog(c4d.gui.GeDialog):
         if doc==None:
             statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
             self.userarea.draw([statusStr,0,0])
-            c4d.EventAdd()
             return
         if doc!=None:
             if doc.GetDocumentPath()==None or doc.GetDocumentPath()=="":
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
                 self.userarea.draw([statusStr,0,0])
-                c4d.EventAdd()
                 return
             if exportData==None:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE2)
                 self.userarea.draw([statusStr,0,0])
-                c4d.EventAdd()
                 return
             if exportData.status==0:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE3)
                 self.userarea.draw([statusStr,0,0])
-                c4d.EventAdd()
                 return
             curPercent=float(float(exportData.allStatus)/float(exportData.allStatusLength))
             c4d.StatusSetBar(curPercent)
             if exportData.status==1:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE4)+"  "+str(int(curPercent*100))+" %"
-                self.userarea.draw([statusStr,curPercent,0])      
-                c4d.EventAdd()             
+                self.userarea.draw([statusStr,curPercent,0])     
                 return
             if exportData.status==2:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE5)+"  "+str(int(curPercent*100))+" %"
                 self.userarea.draw([statusStr,curPercent,float(exportData.subStatus)])
-                c4d.EventAdd()
                 return
             if exportData.status==3:
                 statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE6)+"  "+str(int(curPercent*100))+" %"
                 self.userarea.draw([statusStr,curPercent,0])
-                c4d.EventAdd()
                 return
     def CoreMessage(self, msg, result):
         self.updateCanvas()
