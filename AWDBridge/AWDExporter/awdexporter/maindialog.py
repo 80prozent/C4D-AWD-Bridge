@@ -259,8 +259,8 @@ class MainDialog(c4d.gui.GeDialog):
             self.animationRange=self.GetLong(ids.COMBO_RANGE)
             maindialogHelpers.setUI(self)
         if id == ids.COMBO_TEXTURESMODE: 
-            maindialogHelpers.setValues()   
-            maindialogHelpers.setUI()
+            maindialogHelpers.setValues(self)   
+            maindialogHelpers.setUI(self)
            
         if id == ids.MENU_PRESET_LOAD:   
             exportResult=maindialogPresets.loadPreset(self)  
