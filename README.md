@@ -7,7 +7,7 @@ Disclaimer:
 
  - Use at your own risk.
  - This code is WIP (Work In Progress)
- - As a starting point for this Plugin, I used some of the "Demo-Plugins" found at http://www.smart-page.net/blog/ (a ressource for c4d-python-development)
+ - As a starting point for this Plugins, i used some of the "Demo-Plugins" found at http://www.smart-page.net/blog/ (a great ressource for C4D-Python-development)
 
 License:
 
