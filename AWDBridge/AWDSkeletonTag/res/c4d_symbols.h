@@ -1,7 +1,7 @@
 enum
 {
-	// string table definitions
-	IDS_AWDSKELETONTAG	= 10000,
+    // string table definitions
+    IDS_AWDSKELETONTAG    = 10000,
 
-	DUMMY_
+    DUMMY_
 };

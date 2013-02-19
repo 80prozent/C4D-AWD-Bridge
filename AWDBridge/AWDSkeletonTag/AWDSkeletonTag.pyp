@@ -1,4 +1,5 @@
-#AWD Skeleton Tag (c) 2012 80prozent
+#AWD Skeleton Tag (c) 2013 80prozent[a]differentdesign.de
+
 from c4d import gui, bitmaps
 
 import c4d
@@ -7,32 +8,26 @@ from c4d import *
 from c4d import plugins, bitmaps, utils
 import os, math
 
-PLUGIN_ID = 1028937				#ID for the tag
+PLUGIN_ID = 1028937    #ID for the tag
 
+AWDSKELETON_EXPORT              = 1010
+AWDSKELETON_NAME                = 1011
+AWDSKELETON_EXPORTSCENEOBJECTS  = 1014
+AWDSKELETON_WRONOBJECTTYPE      = 1013
 
-	
-# +++++++++++++++ The plugin tag ++++++++++++++++++++++++++++++		
-		
+# +++++++++++++++ The plugin tag ++++++++++++++++++++++++++++++
+
 class AWDSkeletonTagXpression(plugins.TagData):
 
-    bindingData="100,100,100"
     def Init(self,node):
         bc = node.GetDataInstance()# Reads the tag's container and opens a copy.
-        bc.SetBool(1010,True)#children
-        bc.SetBool(1014,True)#children
-        bc.SetString(1011,"")
-        bc.SetLong(1012,int(3))
-        bc.SetString(1050,str(self.bindingData))
+        bc.SetBool(AWDSKELETON_EXPORT,True)#children
+        bc.SetBool(AWDSKELETON_EXPORTSCENEOBJECTS,True)#children
+        bc.SetString(AWDSKELETON_NAME ,"")
         node.SetData(bc)
         return True
-
-    def Execute(sself, tag, doc, op, bt, priority, flags):
-        print "execute"
-        return True
-    def AddToExecution(self,tag, list):
-		return True
-    def Draw(self, tag, op, bd, bh):
-        
+       
+    def Draw(self, tag, op, bd, bh):        
         if op.GetType()!=Ojoint:
             tag.Remove()
             c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
@@ -42,7 +37,7 @@ class AWDSkeletonTagXpression(plugins.TagData):
 
 # ++++++++++++++++ The Main function. Loads icons, registeres plugins on startup etc. ++++++++++++++++++
 if __name__ == "__main__":
-	dir, file = os.path.split(__file__)
-	bmp = bitmaps.BaseBitmap()
-	bmp.InitWith(os.path.join(dir, "res", "icon.tif"))
-	plugins.RegisterTagPlugin(id=PLUGIN_ID, str="AWD Skeleton", g=AWDSkeletonTagXpression, description="AWDSkeletonTag", icon=bmp, info=c4d.TAG_MULTIPLE|c4d.TAG_EXPRESSION|c4d.TAG_VISIBLE)
+    dir, file = os.path.split(__file__)
+    bmp = bitmaps.BaseBitmap()
+    bmp.InitWith(os.path.join(dir, "res", "icon.tif"))
+    plugins.RegisterTagPlugin(id=PLUGIN_ID, str="AWD Skeleton", g=AWDSkeletonTagXpression, description="AWDSkeletonTag", icon=bmp, info=c4d.TAG_MULTIPLE|c4d.TAG_EXPRESSION|c4d.TAG_VISIBLE)

@@ -1,24 +1,8 @@
 STRINGTABLE AWDObjectSettings
 {
-	AWDObjectSettings	"AWDObjectSettings";
-			
-	DAPE_APPLYTOCHILDS  "Auf untergeordnete Objekte übertragen";
-	DAPE_EXPORT  		"Exportieren";
-	DAPE_SELECTION  	"Selektion";
-	DAPE_LIGHTS  		"Licht";
-	DAPE_TOOLGROUP		"";
-	DAPE_UV  			"UV";
-	DAPE_NORMALS  		"Normale";
-	DAPE_TRIANGULATE 	"Triangulate";
-	DAPE_TOOL			"Export";
-	DAPE_MOVE			"Mesh";
-	DAPE_ROTATE			"WireFrame";
-	DAPE_COMBOID		"Mesh and WireFrame";
-	DAPE_TOOL_ANIMATION	"Animation";
-	DAPE_NOANIMATION	"No Animation";
-	DAPE_ANIMATION		"Animation";
-	DAPE_ANIMATIONONLY	"Animation only";
-	DAPE_TOOLID			"ID";
-	DAPE_OBJECTSETTINGS	"Objekt Settings";
-	
+    AWDObjectSettings    "AWDObjectSettings";
+    
+    DAPE_APPLYTOCHILDS   "Auf untergeordnete Objekte uebertragen";
+    DAPE_EXPORT          "Exportieren";
+
 }

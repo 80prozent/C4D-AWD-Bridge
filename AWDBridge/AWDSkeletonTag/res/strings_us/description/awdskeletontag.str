@@ -1,10 +1,10 @@
 STRINGTABLE AWDSkeletonTag
 {
-	AWDSkeletonTag	"AWDSkeletonTag";
-			
-	AWDSKELETON_EXPORT  	"Export";
-	AWDSKELETON_NAME  		"Skeleton Name";
-	AWDSKELETON_EXPORTSCENEOBJECTS  	"Export Joints as Scene Objects";
-	AWDSKELETON_WRONOBJECTTYPE  	"The Skeleton Tag should only be applied to a (root) joint";
-	
+    AWDSkeletonTag                    "AWDSkeletonTag";
+
+    AWDSKELETON_EXPORT                "Export";
+    AWDSKELETON_NAME                  "Skeleton Name";
+    AWDSKELETON_EXPORTSCENEOBJECTS    "Export Joints as Scene Objects";
+    AWDSKELETON_WRONOBJECTTYPE        "The Skeleton Tag should only be applied to a (root) joint";
+
 }
