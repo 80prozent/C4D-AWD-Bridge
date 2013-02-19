@@ -23,14 +23,15 @@ from awdexporter import maindialog
 def PluginMessage(id, data):
     if id==c4d.C4DPL_ENDPROGRAM or id==c4d.C4DPL_ENDACTIVITY:
         if maindialog.workerThread!=None:
-			#print "Plugin:AWDExporter = One WorkerThread found = "+str(maindialog.workerThread)+" !"
+            #print "Plugin:AWDExporter = One WorkerThread found = "+str(maindialog.workerThread)+" !"
             if maindialog.workerThread.IsRunning():
-				#print "Plugin:AWDExporter = WorkerThread ("+str(maindialog.workerThread)+") is running, and gets shut down"
+                #print "Plugin:AWDExporter = WorkerThread ("+str(maindialog.workerThread)+") is running, and gets shut down"
                 maindialog.workerThread.End(False)   
             maindialog.workerThread=None
         return True
     return False
-	
+
+# this needs to be done for each module that needs to acces the "c4d.plugins.GeLoadString(id)"
 maindialog.__res__ = __res__
 
 # main plugin code:
