@@ -151,21 +151,21 @@ def parseTriangleGeometryBlock(body,block,sceneData):
     if sceneData.debug==True:
         print "parsed: TriangleGeometrieBlock ID = "+str(block.blockID)+" SubMeshes = "+str(subMeshCount)+"  geodict = "+str(len(sceneData.geoDic))
     return newTriangleGeometrieBlock
-	
+
 def parsePrimitiveGeometryBlock(body,block,sceneData):  
     #print "parsePrimitiveGeometryBlock is not used yet" 
     newPrimitiveGeometrieBlock=awdBlocks.PrimitiveGeometrieBlock()    
     body.read(block.blockSize)
     if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: PrimitiveGeometrieBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+        print "skiped because parser is not implemented yet: PrimitiveGeometrieBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newPrimitiveGeometrieBlock
-	
+
 def parseSceneBlock(body,block):  
     #print "parseSceneBlock is not used yet" 
     newSceneBlock=awdBlocks.SceneBlock()   
     body.read(block.blockSize)
     if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: SceneBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+        print "skiped because parser is not implemented yet: SceneBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newSceneBlock
 
 def parseContainerBlock(body,block,sceneData):    
@@ -175,7 +175,7 @@ def parseContainerBlock(body,block,sceneData):
     parentBlock=sceneData.blockDic.get(str(parentID),None)
     parentObj=None
     if parentBlock!=None:
-		parentObj=parentBlock.sceneObject
+        parentObj=parentBlock.sceneObject
     prevObj=c4d.documents.GetActiveDocument().GetFirstObject()
     if prevObj:
         while prevObj.GetNext():
@@ -189,12 +189,11 @@ def parseContainerBlock(body,block,sceneData):
     helpers.parseProperties(body)
     block.sceneObject=newContainer
     if parentID==0:
-		sceneData.rootObjects.append(newContainer)
+        sceneData.rootObjects.append(newContainer)
     if sceneData.debug==True:
-		print "parsed: ContainerBlock ID = "+str(block.blockID)+" parentID = "+str(parentID)
-    return newContainerBlock	
-	
-	
+        print "parsed: ContainerBlock ID = "+str(block.blockID)+" parentID = "+str(parentID)
+    return newContainerBlock
+
 def parseMeshInstanceBlock(body,block,sceneData):  
     newMeshInstanceBlock=awdBlocks.MeshInstanceBlock()   
     parentID,newMatrix,name= helpers.parseSceneHeader(body,sceneData.scale)
@@ -265,16 +264,16 @@ def parseLightBlock(body,block,sceneData):
     newLightBlock=awdBlocks.LightBlock()   
     body.read(block.blockSize)
     if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: LightBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+        print "skiped because parser is not implemented yet: LightBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newLightBlock
-	
+    
 def parseCameraBlock(body,bytes):  
     newCameraBlock=awdBlocks.CameraBlock()    
     body.read(block.blockSize)
-    if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: CameraBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+    if sceneData.debug==True:    
+        print "skiped because parser is not implemented yet: CameraBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newCameraBlock
-	
+
 def parseStandartMaterialBlock(body,block,sceneData):  
     newStandartMaterialBlock=awdBlocks.StandartMaterialBlock()    
     newStandartMaterialBlock.name=helpers.parseVarString(body)  
@@ -283,13 +282,13 @@ def parseStandartMaterialBlock(body,block,sceneData):
     newMaterial=c4d.BaseMaterial(c4d.Mmaterial)
     firstMaterial=c4d.documents.GetActiveDocument().GetFirstMaterial()
     if firstMaterial!=None:
-		while firstMaterial.GetNext():
-			firstMaterial=firstMaterial.GetNext()
+        while firstMaterial.GetNext():
+            firstMaterial=firstMaterial.GetNext()
     
     c4d.documents.GetActiveDocument().InsertMaterial(newMaterial,firstMaterial)
     newMaterial.SetName(newStandartMaterialBlock.name)
     #newMaterial[c4d.MATERIAL_COLOR_SHADER][c4d.BITMAPSHADER_FILENAME]="shit"
-	
+
     #print "MaterialName  =  "+str(newStandartMaterialBlock.name)
     #print "MaterialType  =  "+str(newStandartMaterialBlock.MatType)
     #print "Material numShaders  =  "+str(newStandartMaterialBlock.numShaders)
@@ -298,66 +297,66 @@ def parseStandartMaterialBlock(body,block,sceneData):
     
     attributecount=0
     while attributecount<length:
-		attributeID = struct.unpack('H', body.read(2))[0]
-		#print "Attribute ID = "+str(attributeID)
-		attributeLength =  struct.unpack('I', body.read(4))[0]
-		#print "Attribute Length = "+str(attributeLength)
-		if attributeID==1:
-			colorR=struct.unpack('B', body.read(1))[0]
-			colorG=struct.unpack('B', body.read(1))[0]
-			colorB=struct.unpack('B', body.read(1))[0]
-			colorA=struct.unpack('B', body.read(1))[0]
-			#print newMaterial[c4d.MATERIAL_COLOR_COLOR]
-			newMaterial[c4d.MATERIAL_COLOR_COLOR]=c4d.Vector(float(float(colorB)/255),float(float(colorG)/255),float(float(colorR)/255))
-			
-			#print "Attribute Value  R = "+str( colorR)+"   attributeNr: "+str(attributecount)
-			#print "Attribute Value G = "+str( colorG)
-			#print "Attribute Value B = "+str( colorB)
-			#print "Attribute Value A = "+str( colorA)
-		elif  attributeID==2:
-			textureID=struct.unpack('I', body.read(4))[0]
-			#print "Attribute Value textureID = "+str( textureID)
-		elif  attributeID==11:
-			alphaBlending=struct.unpack('B', body.read(1))[0]
-			#print "Attribute Value AlphaBlending = "+str( alphaBlending)
-		elif  attributeID==12:
-			alphaThreshold=struct.unpack('f', body.read(4))[0]
-			#print "Attribute Value alphaThreshold = "+str( alphaThreshold)
-		elif  attributeID==13:
-			repeat=struct.unpack('B', body.read(1))[0]
-			#print "Attribute Value repeat = "+str( repeat)
-		else:
-			pass#print "skipped conent = "+str(struct.unpack('I', body.read(4))[0])
-			#print "Skipped unknown Attribute nr."+str(attributecount)+" type: "+str(attributeID)+" bytelength = "+str(attributeLength)
-		attributecount += 6+attributeLength
+        attributeID = struct.unpack('H', body.read(2))[0]
+        #print "Attribute ID = "+str(attributeID)
+        attributeLength =  struct.unpack('I', body.read(4))[0]
+        #print "Attribute Length = "+str(attributeLength)
+        if attributeID==1:
+            colorR=struct.unpack('B', body.read(1))[0]
+            colorG=struct.unpack('B', body.read(1))[0]
+            colorB=struct.unpack('B', body.read(1))[0]
+            colorA=struct.unpack('B', body.read(1))[0]
+            #print newMaterial[c4d.MATERIAL_COLOR_COLOR]
+            newMaterial[c4d.MATERIAL_COLOR_COLOR]=c4d.Vector(float(float(colorB)/255),float(float(colorG)/255),float(float(colorR)/255))
+
+            #print "Attribute Value  R = "+str( colorR)+"   attributeNr: "+str(attributecount)
+            #print "Attribute Value G = "+str( colorG)
+            #print "Attribute Value B = "+str( colorB)
+            #print "Attribute Value A = "+str( colorA)
+        elif  attributeID==2:
+            textureID=struct.unpack('I', body.read(4))[0]
+            #print "Attribute Value textureID = "+str( textureID)
+        elif  attributeID==11:
+            alphaBlending=struct.unpack('B', body.read(1))[0]
+            #print "Attribute Value AlphaBlending = "+str( alphaBlending)
+        elif  attributeID==12:
+            alphaThreshold=struct.unpack('f', body.read(4))[0]
+            #print "Attribute Value alphaThreshold = "+str( alphaThreshold)
+        elif  attributeID==13:
+            repeat=struct.unpack('B', body.read(1))[0]
+            #print "Attribute Value repeat = "+str( repeat)
+        else:
+            pass#print "skipped conent = "+str(struct.unpack('I', body.read(4))[0])
+            #print "Skipped unknown Attribute nr."+str(attributecount)+" type: "+str(attributeID)+" bytelength = "+str(attributeLength)
+        attributecount += 6+attributeLength
     
-	
+
     
     
     shadersDone=0
     while shadersDone< newStandartMaterialBlock.numShaders:
-		shaderType=struct.unpack('H', body.read(2))[0]
-		helpers.parseProperties(body)
-		helpers.parseProperties(body)
-		shadersDone+=1
-		
+        shaderType=struct.unpack('H', body.read(2))[0]
+        helpers.parseProperties(body)
+        helpers.parseProperties(body)
+        shadersDone+=1
+
     if newStandartMaterialBlock.MatType==2:
-		textureBlock=sceneData.texDic.get(str(textureID),None)
-		if textureBlock==None:
-			pass#print "No TextureBlock found  "+str(textureID)
-		if textureBlock!=None:
-			#print "parsed: Texture applied to Material ID = "+str(textureID)
-			shdr_texture = c4d.BaseList2D(c4d.Xbitmap)          #Create a bitmap shader in memory
-			shdr_texture[c4d.BITMAPSHADER_FILENAME] = textureBlock.filePath #Assign the path to the texture image to your shader 
-			newMaterial[c4d.MATERIAL_COLOR_SHADER]= shdr_texture        #Assign the shader to the color channel in memory only
-			newMaterial.InsertShader(shdr_texture)                      #Insert the shader into the color channel
-			newMaterial.Update(True, True)                              #Re-calculate the thumbnails of the material	
-    helpers.parseProperties(body)	
+        textureBlock=sceneData.texDic.get(str(textureID),None)
+        if textureBlock==None:
+            pass#print "No TextureBlock found  "+str(textureID)
+        if textureBlock!=None:
+            #print "parsed: Texture applied to Material ID = "+str(textureID)
+            shdr_texture = c4d.BaseList2D(c4d.Xbitmap)          #Create a bitmap shader in memory
+            shdr_texture[c4d.BITMAPSHADER_FILENAME] = textureBlock.filePath #Assign the path to the texture image to your shader 
+            newMaterial[c4d.MATERIAL_COLOR_SHADER]= shdr_texture        #Assign the shader to the color channel in memory only
+            newMaterial.InsertShader(shdr_texture)                      #Insert the shader into the color channel
+            newMaterial.Update(True, True)                              #Re-calculate the thumbnails of the material	
+    helpers.parseProperties(body)
     sceneData.materialsDic[str(block.blockID)]=newMaterial
     if sceneData.debug==True:
-		print "parsed: StandartMaterialBlock ID = "+str(block.blockID)
+        print "parsed: StandartMaterialBlock ID = "+str(block.blockID)
     return newStandartMaterialBlock
-	
+
 def parseTextureBlock(body,block,sceneData): 
     newTextureBlock=awdBlocks.TextureBlock()   
     newTextureBlock.name=helpers.parseVarString(body)   
@@ -365,53 +364,53 @@ def parseTextureBlock(body,block,sceneData):
     newTextureBlock.dataSize=struct.unpack('I', body.read(4))[0]
     newTextureBlock.filePath=""
     if newTextureBlock.isEmbed==0:
-		texFilePath=body.read(newTextureBlock.dataSize)
-		texFileName=os.path.basename(texFilePath)
-		newTextureBlock.filePath=os.path.join(sceneData.texturesExternPath,texFileName)
+        texFilePath=body.read(newTextureBlock.dataSize)
+        texFileName=os.path.basename(texFilePath)
+        newTextureBlock.filePath=os.path.join(sceneData.texturesExternPath,texFileName)
     if newTextureBlock.isEmbed!=0:
-		curPos=body.tell()
-		fileExtension=".jpg"
-		if struct.unpack('H', body.read(2))[0]==55551:
-			fileExtension=".jpg"
-		else:
-			body.seek(curPos)
-			if  struct.unpack('h', body.read(2))[0]==0x424D:
-				fileExtension=".bmp"
-			else:
-				body.seek(int(curPos)+1)
-				if body.read(3)=="PNG":
-					fileExtension=".png"
-				else:
-					body.seek(curPos)
-					if body.read(3)=="GIF":
-						fileExtension=".gif"
-		body.seek(curPos)
-		newTextureBlock.data=body.read(newTextureBlock.dataSize)
-		try:
-			os.makedirs(sceneData.texturesEmbedPath)
-		except OSError:
-			pass
-		newTextureBlock.filePath=os.path.join(sceneData.texturesEmbedPath,str((newTextureBlock.name+fileExtension)))
-		f = open(newTextureBlock.filePath, 'wb')
-		f.write(newTextureBlock.data)
-		f.close()
+        curPos=body.tell()
+        fileExtension=".jpg"
+        if struct.unpack('H', body.read(2))[0]==55551:
+            fileExtension=".jpg"
+        else:
+            body.seek(curPos)
+            if  struct.unpack('h', body.read(2))[0]==0x424D:
+                fileExtension=".bmp"
+            else:
+                body.seek(int(curPos)+1)
+                if body.read(3)=="PNG":
+                    fileExtension=".png"
+                else:
+                    body.seek(curPos)
+                    if body.read(3)=="GIF":
+                        fileExtension=".gif"
+        body.seek(curPos)
+        newTextureBlock.data=body.read(newTextureBlock.dataSize)
+        try:
+            os.makedirs(sceneData.texturesEmbedPath)
+        except OSError:
+            pass
+        newTextureBlock.filePath=os.path.join(sceneData.texturesEmbedPath,str((newTextureBlock.name+fileExtension)))
+        f = open(newTextureBlock.filePath, 'wb')
+        f.write(newTextureBlock.data)
+        f.close()
     
     if sceneData.debug==True:
-		print "parsed: TextureBlock ID = "+str(block.blockID)+" embed = "+str(newTextureBlock.isEmbed)+" path = "+str(newTextureBlock.filePath)
+        print "parsed: TextureBlock ID = "+str(block.blockID)+" embed = "+str(newTextureBlock.isEmbed)+" path = "+str(newTextureBlock.filePath)
     #print newTextureBlock.data
     helpers.parseProperties(body)
     helpers.parseProperties(body)
     sceneData.texDic[str(block.blockID)]=newTextureBlock
-    return newTextureBlock	
-	
+    return newTextureBlock
+
 def parseCubeTextureBlock(body,block,sceneData):     
     newCubeTextureBlock=awdBlocks.CubeTextureBlock()  
     body.read(block.blockSize)
     if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: CubeTextureBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+        print "skiped because parser is not implemented yet: CubeTextureBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newCubeTextureBlock
 
-	
+
 def parseSkeletonBlock(body,block,sceneData):   
     newSkeletonBlock=awdBlocks.SkeletonBlock()
     newSkeletonBlock.name=helpers.parseVarString(body)
@@ -422,90 +421,90 @@ def parseSkeletonBlock(body,block,sceneData):
     
     doc=c4d.documents.GetActiveDocument()
     if sceneData.latestSkinnedMesh!=None and sceneData.latestSkinnedMeshUsed==False:
-		doc.SetActiveObject(sceneData.latestSkinnedMesh.sceneObject,c4d.SELECTION_NEW)	
-		
+        doc.SetActiveObject(sceneData.latestSkinnedMesh.sceneObject,c4d.SELECTION_NEW)	
+    
     parsedJoints=0 
     while parsedJoints<newSkeletonBlock.numJoints:
     
-		jointID=struct.unpack('H', body.read(2))[0]
-		parentJointID=struct.unpack('H', body.read(2))[0]
-		#print "parent Joint = "+str(parentJointID)
-		newJoint= c4d.BaseObject(c4d.Ojoint)
-		if jointID==1:
-			newSkeletonBlock.rootJoint=newJoint
-			skeletonTag= newJoint.MakeTag(1028937)
-			newJoint.SetName(newSkeletonBlock.name)
-			skeletonTag[1011]=newSkeletonBlock.name
-			parentOBJ=None
-			beforeOBJ=None
-			if sceneData.latestSkinnedMesh!=None:
-				parentOBJ=sceneData.latestSkinnedMesh.sceneObject.GetUp()
-				beforeOBJ=sceneData.latestSkinnedMesh.sceneObject
-			if sceneData.latestSkinnedMesh==None:
-				beforeOBJ=c4d.documents.GetActiveDocument().GetFirstObject()
-				if beforeOBJ!=None:
-					while beforeOBJ.GetNext():
-						beforeOBJ=prevObj.GetNext()
-			
-			#print "found" +str(skeletonTag[1050])
-		if jointID!=1:
-			parentOBJ=jointsDic.get(str(parentJointID),None)
-			beforeOBJ=None
-		jointsDic[str(jointID)]=newJoint
-		doc.InsertObject(newJoint,parentOBJ,beforeOBJ)
-		doc.SetActiveObject(newJoint,c4d.SELECTION_ADD)	
-		lookUpName=helpers.parseVarString(body)
-		newJoint.SetName(lookUpName)
-		normalizeMatrix=False
-		if parsedJoints==0:
-			normalizeMatrix=False
-		jointMatrix=helpers.parseMatrix(body,sceneData.scaleJoints,normalizeMatrix,1).__invert__()
-		#jointMatrix.Scale(c4d.Vector(1))
-		newJoint.SetMg(jointMatrix)
-		
-		if jointID==1:
-			newJoint.SetEditorMode(c4d.MODE_OFF)
-			
+        jointID=struct.unpack('H', body.read(2))[0]
+        parentJointID=struct.unpack('H', body.read(2))[0]
+        #print "parent Joint = "+str(parentJointID)
+        newJoint= c4d.BaseObject(c4d.Ojoint)
+        if jointID==1:
+            newSkeletonBlock.rootJoint=newJoint
+            skeletonTag= newJoint.MakeTag(1028937)
+            newJoint.SetName(newSkeletonBlock.name)
+            skeletonTag[1011]=newSkeletonBlock.name
+            parentOBJ=None
+            beforeOBJ=None
+            if sceneData.latestSkinnedMesh!=None:
+                parentOBJ=sceneData.latestSkinnedMesh.sceneObject.GetUp()
+                beforeOBJ=sceneData.latestSkinnedMesh.sceneObject
+            if sceneData.latestSkinnedMesh==None:
+                beforeOBJ=c4d.documents.GetActiveDocument().GetFirstObject()
+                if beforeOBJ!=None:
+                    while beforeOBJ.GetNext():
+                        beforeOBJ=prevObj.GetNext()
+
+            #print "found" +str(skeletonTag[1050])
+        if jointID!=1:
+            parentOBJ=jointsDic.get(str(parentJointID),None)
+            beforeOBJ=None
+        jointsDic[str(jointID)]=newJoint
+        doc.InsertObject(newJoint,parentOBJ,beforeOBJ)
+        doc.SetActiveObject(newJoint,c4d.SELECTION_ADD)	
+        lookUpName=helpers.parseVarString(body)
+        newJoint.SetName(lookUpName)
+        normalizeMatrix=False
+        if parsedJoints==0:
+            normalizeMatrix=False
+        jointMatrix=helpers.parseMatrix(body,sceneData.scaleJoints,normalizeMatrix,1).__invert__()
+        #jointMatrix.Scale(c4d.Vector(1))
+        newJoint.SetMg(jointMatrix)
+    
+        if jointID==1:
+            newJoint.SetEditorMode(c4d.MODE_OFF)
+
             
-		newSkeletonBlock.jointList.append(newJoint)
-		#body.read(48)
-		helpers.parseProperties(body)
-		helpers.parseProperties(body)
-		parsedJoints+=1
+        newSkeletonBlock.jointList.append(newJoint)
+        #body.read(48)
+        helpers.parseProperties(body)
+        helpers.parseProperties(body)
+        parsedJoints+=1
     helpers.parseProperties(body)
     if sceneData.latestSkinnedMesh!=None and sceneData.latestSkinnedMeshUsed==False:
-		sceneData.latestSkinnedMeshUsed=True
-		c4d.CallCommand(1019881) # Bind
-		curPoint=0
-		allPoints=sceneData.latestSkinnedMesh.sceneObject.GetAllPoints()
-		weightTag=sceneData.latestSkinnedMesh.sceneObject.GetTag(1019365)
-		jointCounter=0
-		curSubMesh=0
-		while curPoint<len(allPoints):
-			for curJoint in newSkeletonBlock.jointList:
-				jointIndex=weightTag.FindJoint(curJoint)
-				if jointIndex!=c4d.NOTOK:
-					weightTag.SetWeight(jointIndex, curPoint, 0.0)
-			curJointIdx=0
-			while curJointIdx<sceneData.latestSkinnedMesh.numJoints[curSubMesh]:
-				#print "test 1 = "+str(sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh][jointCounter])
-				#print "test 2 = "+str(sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh])
-				#print "test 3 = "+str(newSkeletonBlock.jointList[sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh][jointCounter]-1])
-				jointIndex=weightTag.FindJoint(newSkeletonBlock.jointList[sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh][jointCounter]])
-				weight=sceneData.latestSkinnedMesh.allJointWeights[curSubMesh][jointCounter]
-				if jointIndex!=c4d.NOTOK:
-					weightTag.SetWeight(jointIndex, curPoint, weight)
-				curJointIdx+=1
-				jointCounter+=1
-			curPoint+=1
-			if curPoint>=sceneData.latestSkinnedMesh.SubmeshPoints[curSubMesh]:
-				curSubMesh+=1
-				jointCounter=0
+        sceneData.latestSkinnedMeshUsed=True
+        c4d.CallCommand(1019881) # Bind
+        curPoint=0
+        allPoints=sceneData.latestSkinnedMesh.sceneObject.GetAllPoints()
+        weightTag=sceneData.latestSkinnedMesh.sceneObject.GetTag(1019365)
+        jointCounter=0
+        curSubMesh=0
+        while curPoint<len(allPoints):
+            for curJoint in newSkeletonBlock.jointList:
+                jointIndex=weightTag.FindJoint(curJoint)
+                if jointIndex!=c4d.NOTOK:
+                    weightTag.SetWeight(jointIndex, curPoint, 0.0)
+            curJointIdx=0
+            while curJointIdx<sceneData.latestSkinnedMesh.numJoints[curSubMesh]:
+                #print "test 1 = "+str(sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh][jointCounter])
+                #print "test 2 = "+str(sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh])
+                #print "test 3 = "+str(newSkeletonBlock.jointList[sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh][jointCounter]-1])
+                jointIndex=weightTag.FindJoint(newSkeletonBlock.jointList[sceneData.latestSkinnedMesh.allJointIndexe[curSubMesh][jointCounter]])
+                weight=sceneData.latestSkinnedMesh.allJointWeights[curSubMesh][jointCounter]
+                if jointIndex!=c4d.NOTOK:
+                    weightTag.SetWeight(jointIndex, curPoint, weight)
+                curJointIdx+=1
+                jointCounter+=1
+            curPoint+=1
+            if curPoint>=sceneData.latestSkinnedMesh.SubmeshPoints[curSubMesh]:
+                curSubMesh+=1
+                jointCounter=0
     sceneData.lastSkeleton=newSkeletonBlock
     if sceneData.debug==True:
-		pass#print "parsed: SkeletonBlock ID = "+str(block.blockID)+" jointNum = "+str(newSkeletonBlock.numJoints)+" applied to mesh ID = "+str(sceneData.latestSkinnedMesh)
+        pass#print "parsed: SkeletonBlock ID = "+str(block.blockID)+" jointNum = "+str(newSkeletonBlock.numJoints)+" applied to mesh ID = "+str(sceneData.latestSkinnedMesh)
     return newSkeletonBlock
-	
+
 def parseSkeletonPoseBlock(body,block,sceneData):   
     newSkeletonPoseBlock=awdBlocks.SkeletonPoseBlock()
     newSkeletonPoseBlock.name = helpers.parseVarString(body)
@@ -517,18 +516,18 @@ def parseSkeletonPoseBlock(body,block,sceneData):
         hasTransform=struct.unpack('B', body.read(1))[0]
         newSkeletonPoseBlock.transformations.append(hasTransform)
         if hasTransform==0:
-			newSkeletonPoseBlock.transformations.append(c4d.Matrix())
+            newSkeletonPoseBlock.transformations.append(c4d.Matrix())
         if hasTransform!=0:
-			normalizeMatrix=True
-			if transformationsDone==0:
-				normalizeMatrix=True
-			newSkeletonPoseBlock.transformations.append(helpers.parseMatrix(body,sceneData.scaleJoints,normalizeMatrix,1))
+            normalizeMatrix=True
+            if transformationsDone==0:
+                normalizeMatrix=True
+            newSkeletonPoseBlock.transformations.append(helpers.parseMatrix(body,sceneData.scaleJoints,normalizeMatrix,1))
         transformationsDone+=1
     helpers.parseProperties(body)
     if sceneData.debug==True:
-		print "parsed: SkeletonPoseBlock ID = "+str(block.blockID)+" jointNum = "+str(newSkeletonPoseBlock.numJoints)
+        print "parsed: SkeletonPoseBlock ID = "+str(block.blockID)+" jointNum = "+str(newSkeletonPoseBlock.numJoints)
     return newSkeletonPoseBlock
-	
+
 
 def parseSkeletonAnimationBlock(body,block,sceneData): 
     #print "123456"
@@ -537,9 +536,9 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
     newSkeletonAnimationBlock.numFrames=struct.unpack('H', body.read(2))[0]
     helpers.parseProperties(body)
 #    if newSkeletonAnimationBlock.numFrames==len(sceneData.skeletonPoses):
-#		print "Animation PARSED = "+str(newSkeletonAnimationBlock.name)+" /  frames excpected = "+str(newSkeletonAnimationBlock.numFrames)+"  frames found = "+str(len(sceneData.skeletonPoses))
+#	print "Animation PARSED = "+str(newSkeletonAnimationBlock.name)+" /  frames excpected = "+str(newSkeletonAnimationBlock.numFrames)+"  frames found = "+str(len(sceneData.skeletonPoses))
 #      
-	
+
 
     IDPOSX=c4d.DescID(c4d.DescLevel(c4d.ID_BASEOBJECT_POSITION,c4d.DTYPE_VECTOR,0),c4d.DescLevel(c4d.VECTOR_X,c4d.DTYPE_REAL,0))
     IDPOSY=c4d.DescID(c4d.DescLevel(c4d.ID_BASEOBJECT_POSITION,c4d.DTYPE_VECTOR,0),c4d.DescLevel(c4d.VECTOR_Y,c4d.DTYPE_REAL,0))
@@ -562,45 +561,61 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
         lastDuration+=frameDoration
         if framesDone==0:
             if sceneData.lastSkeleton.hasRetargetTag!=None:
-				newHirarchy=sceneData.lastSkeleton.refObject.GetClone()
-				if newHirarchy.GetTag(1028937):
-					newHirarchy.GetTag(1028937).Remove()
-				skeletonAnimationTag=newHirarchy.MakeTag(1028938)
-				skeletonAnimationTag[1011]=newSkeletonAnimationBlock.name
-				parentObj=sceneData.lastSkeleton.jointList[0].GetUp()
-				prevObj=None
-				if parentObj!=None:
-					prevObj=parentObj.GetDownLast()
-				if parentObj==None:
-					beforeOBJ=c4d.documents.GetActiveDocument().GetFirstObject()
-					if beforeOBJ!=None:
-						while beforeOBJ.GetNext():
-							beforeOBJ=beforeOBJ.GetNext()
-				
-					
-				doc.InsertObject(newHirarchy,parentObj,prevObj)
-				newHirarchy.SetName(newSkeletonAnimationBlock.name)
-				skeletonAnimationTag[1011]=newSkeletonAnimationBlock.name
-			
+                newHirarchy=sceneData.lastSkeleton.refObject.GetClone()
+                if newHirarchy.GetTag(1028937):
+                    newHirarchy.GetTag(1028937).Remove()
+                skeletonAnimationTag=newHirarchy.MakeTag(1028938)
+                skeletonAnimationTag[1011]=newSkeletonAnimationBlock.name
+                parentObj=sceneData.lastSkeleton.jointList[0].GetUp()
+                prevObj=None
+                if parentObj!=None:
+                    prevObj=parentObj.GetDownLast()
+                if parentObj==None:
+                    beforeOBJ=c4d.documents.GetActiveDocument().GetFirstObject()
+                    if beforeOBJ!=None:
+                        while beforeOBJ.GetNext():
+                            beforeOBJ=beforeOBJ.GetNext()
+
+
+                doc.InsertObject(newHirarchy,parentObj,prevObj)
+                newHirarchy.SetName(newSkeletonAnimationBlock.name)
+                skeletonAnimationTag[1011]=newSkeletonAnimationBlock.name
+
             if sceneData.lastSkeleton.hasRetargetTag==None: 
-				sceneData.lastSkeleton.refObject=sceneData.lastSkeleton.jointList[0].GetClone()
-				newHirarchy=sceneData.lastSkeleton.refObject.GetClone()
-				if newHirarchy.GetTag(1028937):
-					newHirarchy.GetTag(1028937).Remove()
-				skeletonAnimationTag=newHirarchy.MakeTag(1028938)
-				parentObj=sceneData.lastSkeleton.jointList[0].GetUp()
-				prevObj=None
-				if parentObj!=None:
-					prevObj=parentObj.GetDownLast()
-				doc.InsertObject(newHirarchy,parentObj,prevObj)
-				newHirarchy.SetName(newSkeletonAnimationBlock.name)
-				sceneData.lastSkeleton.hasRetargetTag=sceneData.lastSkeleton.jointList[0].MakeTag(1024237)  
-				sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_HIERARCHY]=True
-				sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_P]=True
-				sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_R]=True
-					
-         
-   
+                sceneData.lastSkeleton.refObject=sceneData.lastSkeleton.jointList[0].GetClone()
+                newHirarchy=sceneData.lastSkeleton.refObject.GetClone()
+                if newHirarchy.GetTag(1028937):
+                    newHirarchy.GetTag(1028937).Remove()
+                skeletonAnimationTag=newHirarchy.MakeTag(1028938)
+                parentObj=sceneData.lastSkeleton.jointList[0].GetUp()
+                prevObj=None
+                if parentObj!=None:
+                    prevObj=parentObj.GetDownLast()
+                doc.InsertObject(newHirarchy,parentObj,prevObj)
+                newHirarchy.SetName(newSkeletonAnimationBlock.name)
+                sceneData.lastSkeleton.hasRetargetTag=sceneData.lastSkeleton.jointList[0].MakeTag(1024237)  
+                sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_HIERARCHY]=True
+                sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_P]=True
+                sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_R]=True
+                sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_R]=True
+                sceneData.lastSkeleton.hasRetargetTag.AddMorph()
+                sceneData.lastSkeleton.hasRetargetTag.UpdateMorphs()
+                
+                #hasRetargetTag2=newHirarchy.MakeTag(1024237)  
+                #hasRetargetTag2[c4d.ID_CA_POSE_HIERARCHY]=True
+                #hasRetargetTag2[c4d.ID_CA_POSE_P]=True
+                #hasRetargetTag2[c4d.ID_CA_POSE_R]=True
+                #hasRetargetTag2[c4d.ID_CA_POSE_R]=True
+                #newbase=hasRetargetTag2.AddMorph()
+                #hasRetargetTag2.UpdateMorphs()
+                
+                #newMorph=sceneData.lastSkeleton.hasRetargetTag.AddMorph()
+                #newMorph.CopyFrom(newbase,None,c4d.CAMORPH_COPY_FLAGS_0)
+                #newMorph.SetMode(doc, sceneData.lastSkeleton.hasRetargetTag, c4d.CAMORPH_MODE_FLAGS_EXPAND,c4d.CAMORPH_MODE_ABS)
+                #sceneData.lastSkeleton.hasRetargetTag[c4d.ID_CA_POSE_TARGET]=newHirarchy
+                #sceneData.lastSkeleton.hasRetargetTag.UpdateMorphs()
+
+            
             newHirarchy.SetEditorMode(c4d.MODE_OFF)
             sceneData.latestjointList=[]
             helpers.createJointListRekursive(newHirarchy,sceneData)
@@ -707,8 +722,7 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
                                 keyscalez.SetTime(curvescalez,newkeyTime)
                                 curvescalez.InsertKey(keyscalez)
                                 
-							
-							
+
 
                         if poseBlock.blockDataObject.transformations[dataCount]==0:
                             #print "no matrix for this joint"
@@ -720,7 +734,7 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
         framesDone+=1
     helpers.parseProperties(body)
     if sceneData.debug==True:
-		print "parsed: SkeletonAnimationBlock ID = "+str(block.blockID)+" name = "+str(newSkeletonAnimationBlock.name)+" numFrames = "+str(newSkeletonAnimationBlock.numFrames)
+        print "parsed: SkeletonAnimationBlock ID = "+str(block.blockID)+" name = "+str(newSkeletonAnimationBlock.name)+" numFrames = "+str(newSkeletonAnimationBlock.numFrames)
     
     #sceneData.latestSkeletonAnimation=newSkeletonAnimation
     return newSkeletonAnimationBlock
@@ -730,7 +744,7 @@ def parseUVAnimationBlock(body,block,sceneData):
     newUVAnimationBlock=awdBlocks.UVAnimationBlock()
     body.read(block.blockSize)
     if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: UVAnimationBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+        print "skiped because parser is not implemented yet: UVAnimationBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newUVAnimationBlock
 
 def parseNameSpaceBlock(body,block,sceneData):  
@@ -738,9 +752,9 @@ def parseNameSpaceBlock(body,block,sceneData):
     newNameSpaceBlock=awdBlocks.NameSpaceBlock()
     body.read(block.blockSize) 
     if sceneData.debug==True:
-		print "skiped because parser is not implemented yet: NameSpaceBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
+        print "skiped because parser is not implemented yet: NameSpaceBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize)
     return newNameSpaceBlock
-	
+
 def parseMetaDataBlock(body,block,sceneData):  
     if sceneData.debug==True:
         print "parsed MetaDataBlock ID = "+str(block.blockID)+" size = "+str(block.blockSize) 
