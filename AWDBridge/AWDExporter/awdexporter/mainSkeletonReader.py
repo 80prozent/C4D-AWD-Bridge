@@ -22,8 +22,8 @@ def createSkeletonBlocks(objList,exportData,mainDialog):
 
 def buildSkeletonAnimation(exportData,curObj,mainDialog):   
     #print "Build Skeleton Animation ###################"
-    minFrame=curObj.GetTag(1028938)[1013]
-    maxFrame=curObj.GetTag(1028938)[1014]
+    minFrame=mainDialog.firstFrame#curObj.GetTag(1028938)[1013]
+    maxFrame=mainDialog.lastFrame#curObj.GetTag(1028938)[1014]
     curFrame=minFrame
     durationList=[]
     idList=[]
