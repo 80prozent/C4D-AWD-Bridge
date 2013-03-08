@@ -408,29 +408,38 @@ class BaseAttribute(object):
 class awdGeometryStream(object):
     def __init__(self,streamType,streamData):
         self.streamType=streamType
+        self.streamTypeName="None"
         self.streamData=streamData
         if streamType==1:#Vertex
+            self.streamTypeName="Vertex"
             self.dataType = "f"
             self.dataType2 = 4
         if streamType==2:#Index
+            self.streamTypeName="Index"
             self.dataType = "H"
             self.dataType2 = 2
         if streamType==3:#UV
+            self.streamTypeName="UV"
             self.dataType = "f"
             self.dataType2 = 4
         if streamType==4:#VertexNormals
+            self.streamTypeName="VertexNormals"
             self.dataType = "f"
             self.dataType2 = 4
         if streamType==5:#VertexTangents
+            self.streamTypeName="VertexTangents"
             self.dataType = "f"
             self.dataType2 = 4
         if streamType==6:#JointIndex
+            self.streamTypeName="JointIndex"
             self.dataType = "H"
             self.dataType2 = 2
         if streamType==7:#JointWeights
+            self.streamTypeName="JointWeights"
             self.dataType = "f"
             self.dataType2 = 4
         if streamType==8:#quads - not used by official AWD
+            self.streamTypeName="quads"
             self.dataType = "H"
             self.dataType2 = 2
 
@@ -463,6 +472,7 @@ class awdSubMesh(object):
     def writeBinary(self,exportData):
         outputBits=struct.pack("< I",self.saveSubMeshProps)
         subMeshCount=0
+        outputString="Subemesh '"+str(self.selectionName)+"' streams = "
         while subMeshCount<len(self.saveGeometryStreams):
             if len(self.saveGeometryStreams[subMeshCount].streamData)>0:
             
@@ -470,6 +480,7 @@ class awdSubMesh(object):
                 outputBits+=struct.pack("< B",self.saveGeometryStreams[subMeshCount].dataType2)
                 streamDataBits=str()
                 streamCounter=0
+                outputString+=str(self.saveGeometryStreams[subMeshCount].streamTypeName)+" = "+str(len(self.saveGeometryStreams[subMeshCount].streamData))+"  / "
                 while streamCounter< len(self.saveGeometryStreams[subMeshCount].streamData):
                     streamDataBits+=struct.pack(str("< "+str(self.saveGeometryStreams[subMeshCount].dataType)),self.saveGeometryStreams[subMeshCount].streamData[streamCounter])
                     streamCounter+=1
@@ -477,6 +488,6 @@ class awdSubMesh(object):
 
             subMeshCount+=1
         if exportData.debug==True:
-            print "SubMesh  Faces= "+str((len(self.indexBuffer)/3)+(len(self.quadBuffer)/2))+" Verts= "+str(len(self.vertexBuffer))+" UVs= "+str(len(self.uvBuffer))+" Normals= "+str(len(self.normalBuffer))
+            print outputString
         outputBits+=struct.pack("< I",self.saveUserAttributesList)
         return outputBits

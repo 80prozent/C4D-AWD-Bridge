@@ -434,6 +434,7 @@ def buildGeometryStreams(subMesh,scale):
                     subMesh.saveWeightsBuffer[bufferCount][jointCount]=0
                 allWeight+=subMesh.saveWeightsBuffer[bufferCount][jointCount]
                 jointCount+=1
+                
             if allWeight == 0:
                 subMesh.saveWeightsBuffer[bufferCount][0]=1
                 allWeight=1

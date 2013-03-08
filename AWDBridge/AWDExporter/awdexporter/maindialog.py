@@ -14,12 +14,14 @@ exportData=None
 enableObjects=[]
 enableStates=[]
 
+# this class is C4DThread Class, and will be executed to have calculated the mesh-converting in other thread than the c4d main thread
 class WorkerThread(c4d.threading.C4DThread):    
     def Main(self):
         global exportData
         doc=c4d.documents.GetActiveDocument()
-        workerExporter.startWorkerExport(exportData,self)                
-        c4d.StatusClear()
+        if doc is not None:
+            workerExporter.startWorkerExport(exportData,self)                
+            c4d.StatusClear()
 
 class MainDialog(c4d.gui.GeDialog):
        

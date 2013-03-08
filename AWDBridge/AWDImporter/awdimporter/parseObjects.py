@@ -587,6 +587,7 @@ def parseSkeletonAnimationBlock(body,block,sceneData):
                 if newHirarchy.GetTag(1028937):
                     newHirarchy.GetTag(1028937).Remove()
                 skeletonAnimationTag=newHirarchy.MakeTag(1028938)
+                skeletonAnimationTag[1011]=newSkeletonAnimationBlock.name
                 parentObj=sceneData.lastSkeleton.jointList[0].GetUp()
                 prevObj=None
                 if parentObj!=None:

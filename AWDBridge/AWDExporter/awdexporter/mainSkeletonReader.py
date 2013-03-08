@@ -11,12 +11,16 @@ from awdexporter import classesAWDBlocks
    
 def createSkeletonBlocks(objList,exportData,mainDialog):
     for object in objList:
-        if object.GetType()==c4d.Ojoint and object.GetTag(1028937)!=None:
-            if object.GetTag(1028937)[1010]==True:
-                buildSkeleton(exportData,object)
-        if object.GetType()==c4d.Ojoint and object.GetTag(1028938)!=None:
-            if object.GetTag(1028938)[1010]==True:   
-                buildSkeletonAnimation(exportData,object,mainDialog)
+        skeletonTag=object.GetTag(1028937)
+        if object.GetType()==c4d.Ojoint and skeletonTag is not None:
+            if skeletonTag[1010]==True:
+                if skeletonTag[1011] is not None:
+                    buildSkeleton(exportData,object)
+        skeletonAnimationTag=object.GetTag(1028938)
+        if object.GetType()==c4d.Ojoint and skeletonAnimationTag!=None:
+            if skeletonAnimationTag[1010]==True: 
+                if skeletonAnimationTag[1011] is not None:
+                    buildSkeletonAnimation(exportData,object,mainDialog)
         if len(object.GetChildren())>0:
             createSkeletonBlocks(object.GetChildren(),exportData,mainDialog)
 
@@ -69,7 +73,7 @@ def buildSkeletonPose(exportData,curObj,curTime):
     newAWDBlock.name=curObj.GetTag(1028938)[1011]
     exportData.idCounter+=1
     newAWDBlock.tagForExport=True
-    c4d.documents.GetActiveDocument().SetTime(curTime)# set original Time
+    c4d.documents.SetDocumentTime(c4d.documents.GetActiveDocument(), curTime)# set original Time
     c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
     c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
     c4d.EventAdd(c4d.EVENT_ANIMATE)
@@ -107,6 +111,8 @@ def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,newAWDBlock):
         exportData.jointIDstoJointBlocks[str(jointObj.GetName())]=newJoint
         parentID2=(len(jointList)+1)
         newJoint.lookUpName=exportData.IDsToAWDBlocksDic[jointObj.GetName()].name
+        print "matrix = "+str(jointObj.GetMg())
+        print "inv matrix = "+str(jointObj.GetMg().__invert__())
         newJoint.transMatrix=jointObj.GetMg().__invert__()
         jointList.append(newJoint)
         if len(jointObj.GetChildren())>0:
