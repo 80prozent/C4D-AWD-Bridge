@@ -111,8 +111,8 @@ def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,newAWDBlock):
         exportData.jointIDstoJointBlocks[str(jointObj.GetName())]=newJoint
         parentID2=(len(jointList)+1)
         newJoint.lookUpName=exportData.IDsToAWDBlocksDic[jointObj.GetName()].name
-        print "matrix = "+str(jointObj.GetMg())
-        print "inv matrix = "+str(jointObj.GetMg().__invert__())
+        #print "matrix = "+str(jointObj.GetMg())
+        #print "inv matrix = "+str(jointObj.GetMg().__invert__())
         newJoint.transMatrix=jointObj.GetMg().__invert__()
         jointList.append(newJoint)
         if len(jointObj.GetChildren())>0:
