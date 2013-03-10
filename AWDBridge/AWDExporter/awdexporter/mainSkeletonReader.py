@@ -26,8 +26,8 @@ def createSkeletonBlocks(objList,exportData,mainDialog):
 
 def buildSkeletonAnimation(exportData,curObj,mainDialog):   
     #print "Build Skeleton Animation ###################"
-    minFrame=mainDialog.firstFrame#curObj.GetTag(1028938)[1013]
-    maxFrame=mainDialog.lastFrame#curObj.GetTag(1028938)[1014]
+    minFrame=mainDialog.GetReal(ids.REAL_FIRSTFRAME)
+    maxFrame=mainDialog.GetReal(ids.REAL_LASTFRAME)
     curFrame=minFrame
     durationList=[]
     idList=[]
@@ -39,6 +39,7 @@ def buildSkeletonAnimation(exportData,curObj,mainDialog):
         return 
     curve=track.GetCurve()
     keyCounter=0
+    print "MinFarme = "+str(minFrame)+"  / MinFarme = "+str(maxFrame)+"  / allFrames = "+str(curve.GetKeyCount())
     while keyCounter<curve.GetKeyCount():  
         key=curve.GetKey(keyCounter)    
         exportData.allStatus+=float(10/float(curve.GetKeyCount()))
@@ -113,7 +114,8 @@ def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,newAWDBlock):
         newJoint.lookUpName=exportData.IDsToAWDBlocksDic[jointObj.GetName()].name
         #print "matrix = "+str(jointObj.GetMg())
         #print "inv matrix = "+str(jointObj.GetMg().__invert__())
-        newJoint.transMatrix=jointObj.GetMg().__invert__()
+        bindMatrix=jointObj.GetMg().__invert__()#.GetNormalized()
+        newJoint.transMatrix=bindMatrix#
         jointList.append(newJoint)
         if len(jointObj.GetChildren())>0:
             buildSkeletonJoint(jointObj.GetChildren(),jointList,parentID2,exportData,newAWDBlock)

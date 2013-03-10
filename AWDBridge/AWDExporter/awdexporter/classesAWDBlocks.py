@@ -340,11 +340,12 @@ class SkeletonPoseBlock(BaseBlock):
         skeletonPoseBlockBytes+=struct.pack("< I",0)
         jointcounter=0
         while jointcounter<len(self.transformations):
+            self.transformations[jointcounter].Normalize()
             skeletonPoseBlockBytes+=struct.pack("< B",1)
             skeletonPoseBlockBytes+=struct.pack("< f",self.transformations[jointcounter].v1.x)+struct.pack("< f",self.transformations[jointcounter].v1.y)+struct.pack("< f",self.transformations[jointcounter].v1.z)
             skeletonPoseBlockBytes+=struct.pack("< f",self.transformations[jointcounter].v2.x)+struct.pack("< f",self.transformations[jointcounter].v2.y)+struct.pack("< f",self.transformations[jointcounter].v2.z)
             skeletonPoseBlockBytes+=struct.pack("< f",self.transformations[jointcounter].v3.x)+struct.pack("< f",self.transformations[jointcounter].v3.y)+struct.pack("< f",self.transformations[jointcounter].v3.z)
-            skeletonPoseBlockBytes+=struct.pack("< f",float(self.transformations[jointcounter].off.x*exportData.scale))+struct.pack("< f",float(self.transformations[jointcounter].off.y*exportData.scale))+struct.pack("< f",float(self.transformations[jointcounter].off.z*exportData.scale))
+            skeletonPoseBlockBytes+=struct.pack("< f",float(self.transformations[jointcounter].off.x))+struct.pack("< f",float(self.transformations[jointcounter].off.y))+struct.pack("< f",float(self.transformations[jointcounter].off.z))
             jointcounter+=1
         skeletonPoseBlockBytes+=struct.pack("< I",0)
         return baseBlockBytes+struct.pack("< I",len(skeletonPoseBlockBytes))+skeletonPoseBlockBytes

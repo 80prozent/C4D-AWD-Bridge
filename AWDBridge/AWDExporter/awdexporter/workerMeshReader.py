@@ -55,10 +55,10 @@ def convertMesh(meshBlock,exportData,workerthreat):
             meshBlock.jointTranslater=[]
             while jointcounter<meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJointCount():
                 curJoint=meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJoint(jointcounter,doc)
-                if exportData.jointIDstoSkeletonBlocks.get(str(curJoint.GetName()),None)==None:
+                if exportData.jointIDstoSkeletonBlocks.get(str(curJoint.GetName()),None) is None:
                     noValidSkeleton=True
                     break
-                if exportData.jointIDstoSkeletonBlocks.get(str(curJoint.GetName()),None)!=None:
+                if exportData.jointIDstoSkeletonBlocks.get(str(curJoint.GetName()),None) is not None:
                     if firstSkeletonName!=exportData.jointIDstoSkeletonBlocks[str(curJoint.GetName())].name:
                         noValidSkeleton=True
                         break

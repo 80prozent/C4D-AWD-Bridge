@@ -127,18 +127,20 @@ def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,cur
         if str(faceStyle)=="quad":
             curSubMesh.quadBuffer.append(len(curSubMesh.vertexBuffer))
 
-        if checkerstring!= None:
+        if checkerstring is not None:
             curSubMesh.uniquePoolDict[checkerstring]=len(curSubMesh.vertexBuffer)
         #curSubMesh.indexBufferMorphed.append("p") 
         curSubMesh.vertexBuffer.append(curPoint) 
         #curSubMesh.sharedvertexBuffer.append(-1) faceStyle
-        if curUv!= None:
+        if curUv is not None:
             curSubMesh.uvBuffer.append(curUv)
-        if curNormal!= None:
+        if curNormal is not None:
             curSubMesh.normalBuffer.append(curNormal)
-        if curNormalf!= None:
+        if curNormalf is not None:
             curSubMesh.faceNormal.append(curNormalf)
-        if weights!= None:
+        if weights is None:
+            print ("jes")
+        if weights is not None:
             curSubMesh.weightsBuffer.append(weights)
         if joints!= None:
             curSubMesh.jointidxBuffer.append(joints)
@@ -156,7 +158,8 @@ def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,cur
                 curSubMesh.uvBufferMorphed.append(curUV)
             curSubMesh.uniquePoolMorphed.append(checkerstring)
             curSubMesh.weightsBuffer.append(weights)
-            curSubMesh.jointidxBuffer.append(joints) """  
+            curSubMesh.jointidxBuffer.append(joints) 
+"""  
                         
 
             
@@ -357,9 +360,11 @@ def transformUVS(subMesh):
                         if uv.y>repXCounter:
                             uv.y=1
             #print "texuretag repeat = "+str(repeat)+" scaleU = "+str(scaleU)+" scaleV = "+str(scaleV)
-                
+    
+# build all the geometryStreams (the geometry-streams contain the data still as python-list, and will be parsed into binary 
 def buildGeometryStreams(subMesh,scale):
         
+    # create the away3d-vertexBuffer-list from the c4d-point-list
     if len(subMesh.vertexBuffer)>0:
         pointData=[]
         for point in subMesh.vertexBuffer:
@@ -367,6 +372,8 @@ def buildGeometryStreams(subMesh,scale):
             pointData.append(point.y*scale)
             pointData.append(point.z*scale)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(1,pointData))
+        
+    # create the away3d-vnormalBuffer-list from the c4d-Normal-list
     if len(subMesh.normalBuffer)>0:
         normalData=[]
         for point in subMesh.normalBuffer:
@@ -374,31 +381,40 @@ def buildGeometryStreams(subMesh,scale):
             normalData.append(point.y)
             normalData.append(point.z)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(4,normalData))
+        
+    # create the away3d-quadBuffer-list from the c4d-quad-list
     if len(subMesh.quadBuffer)>0:
         quadData=[]
         for indexPoint in subMesh.quadBuffer:
             quadData.append(indexPoint)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(8,quadData))
+        
+    # create the away3d-indexBuffer-list from the c4d-index-list
     if len(subMesh.indexBuffer)>0:
         indexData=[]
         for indexPoint in subMesh.indexBuffer:
             indexData.append(indexPoint)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(2,indexData))
+        
+    # create the away3d-uvBuffer-list from the c4d-uv-list
     if len(subMesh.uvBuffer)>0:
         uvData=[]
         for uv in subMesh.uvBuffer:
             uvData.append(uv.x)
             uvData.append(uv.y)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(3,uvData))
+        
+    # create the away3d-WeightBuffer and JointIndexBuffer-list from the c4d-Weights/jointIndex-list
     if len(subMesh.weightsBuffer)>0 and len(subMesh.jointidxBuffer)>0:
         maxJoints=0
         subMesh.saveWeightsBuffer=[]
         subMesh.saveIndexBuffer=[]
         for weights in subMesh.weightsBuffer:
-            subMesh.saveWeightsBuffer.append([])
-            subMesh.saveIndexBuffer.append([])
+            subMesh.saveWeightsBuffer.append([])# for each point create a empty list, that will store all weights for this point later
+            subMesh.saveIndexBuffer.append([])# for each point create a empty list, that will store all JointIndicies for this point later
             if len(weights)>maxJoints:
-                maxJoints=len(weights)
+                maxJoints=len(weights)# find the maximum of used joints per converting
+                
         jointCount=0
         while jointCount<maxJoints:
             bufferCount=0
@@ -413,11 +429,13 @@ def buildGeometryStreams(subMesh,scale):
                         biggestWeight=subMesh.weightsBuffer[bufferCount][weightcount]
                         curweightcount=weightcount
                     weightcount+=1
+                    
                 if curweightcount>=0:
                     newIndex=subMesh.jointidxBuffer[bufferCount][curweightcount]
                     biggestWeight=biggestWeight
                     subMesh.weightsBuffer[bufferCount].pop(curweightcount)
                     subMesh.jointidxBuffer[bufferCount].pop(curweightcount)
+                    
                 subMesh.saveIndexBuffer[bufferCount].append(newIndex)
                 subMesh.saveWeightsBuffer[bufferCount].append(biggestWeight)
                 bufferCount+=1
@@ -448,13 +466,21 @@ def buildGeometryStreams(subMesh,scale):
             bufferCount+=1
 
         indexData=[]
+        printCnt=0
         for index in subMesh.saveIndexBuffer:
+            #print str(printCnt)+"  =  "+str(index)
+            printCnt+=1
             for index2 in index:
+                if str(index2)==str(1):
+                    pass#print "bound to nulldata"
                 indexData.append(index2)            
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(6,indexData))
 
         weightData=[]
+        printCnt=0
         for weight in subMesh.saveWeightsBuffer:
+            #print str(printCnt)+"  =  "+str(weight)
+            printCnt+=1
             for weight2 in weight:
                 weightData.append(weight2)
             
