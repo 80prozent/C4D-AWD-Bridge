@@ -16,6 +16,7 @@ class BaseBlock(object):# baseclass for all blocks - not to be instanced directl
         self.blockType = blockType
         self.blockFlags= 0
         self.blockSize= 0
+        self.isSkinned=False
         self.dataParentBlockID=-1
         self.saveColorTextureID= -1
         self.tagForExport = False # part of a workarround

@@ -2,35 +2,67 @@
 
 STRINGTABLE
 {
-    STR_TITLE                   	"AWDExporter";
-    MENU_PRESET      				"Presets";
-    MENU_PRESET_LOAD        		"Laden";
-    MENU_PRESET_SAVE        		"Speichern";
-    MENU_ABOUT        				"?";
-    MENU_ABOUT_HELP        			"Hilfe";
-    MENU_ABOUT_ABOUT       			"Ueber";
-    BTN_EXPORT        				"Exportieren";
+    STR_TITLE                   	    "AWDExporter";
+    MENU_ABOUT        				    "?";
+    MENU_ABOUT_HELP        			    "Hilfe";
+    MENU_ABOUT_ABOUT       			    "Ueber";
+    
+    BTN_EXPORT        				    "Exportieren";
+    BTN_CANCEL        					"Abbrechen";
 
-	SUCCESSMESSAGE  						"Die Szene wurde erfolgreich als 'awd'-Datei gespeichert.";
+    BTN_SAVEWITHASSETS					"C4D Project mit Anhängen speichern";
+    BTN_CHECKSKELETON					"Selektiertes Skeleton testen";
+    BTN_CANCEL        					"Abbrechen";
+    BTN_CREATESKELETONANIMATION			"Copy as Animation";
+    
+    BTN_CHECKPOLY						"Check selected Polygon-Object";
+    TABGRP_GENERAL                      "General";
+    TABGRP_MATERIALS                    "Materialien";
+    TABGRP_ANIMATIONS                   "Animationen";
+    
+    GRP_TEXTURES                        "Texturen";
+    
+    CBOX_OPENPREFAB        			    "Datei in Prefab oeffnen";
+    CBOX_UNUSEDMATS        				"Unbenutze Materialien";
+	CBOX_CLOSEAFTEREXPORT				"Nach Export Schliessen";
+	CBOX_COMPRESSED						"Daten komprimieren";
+	CBOX_ANIMATION						"Export Skeleton-Animation";
+	CBOX_STREAMING						"Streaming aktivieren";
+	CBOX_DEBUG							"Debug";
+    
+    COMBOITEM_EMBED    					"Embed JPG/PNG Data";
+    COMBOITEM_EXTERNPATH    			"External Files";
+
+	COMBO_RANGE_STR						"Range: ";
+	COMBO_RANGE_DOC    					"Document";
+	COMBO_RANGE_PREVIEW   				"Preview";
+	COMBO_RANGE_CUSTOM    				"Custom";
+    
+	REAL_SCALE_STR		 				"Scale: ";
+	REAL_FIRSTFRAME_STR					"First Frame: ";
+	REAL_LASTFRAME_STR					"Last Frame: ";
+    
+	SUCCESSMESSAGE  					"Die Szene wurde erfolgreich als 'awd'-Datei gespeichert.";
 	
-	ERRORMESSAGEOBJ  						"Invalide Object: ";
+	ERRORMESSAGEOBJ  					"Invalide Object: ";
 	ERRORMESSAGE  						"Waehrend dem Exportieren ist ein Fehler aufgetreten !";
 	ERRORMESSAGE1  						"Kein Selektiertes Objekt gefunden";
 	ERRORMESSAGE2  						"Leere Scene kann nicht exportiert werden!";
-	ERRORMESSAGE3  							"Die einzigen unterstuetzten Bild-Formate sind 'jpg' und 'png'!";
-	ERRORMESSAGE4  							"Konnte eine Textur nicht finden! \nStellen sie sicher das der Datei-Pfad dieser texture 'absolut' oder relativ zu dem C4D-Projekt-ordner angegeben ist. Sollten sie nicht sicher sein, Fuehren sie die Funktion 'Datei->Projekt inkl Bestandteile speichern' aus. Das neu gespeicherte Dokument sollte sich nun im Hinblick auf Texturen problemlos exportieren lassen.!";
+	ERRORMESSAGE3  						"Die einzigen unterstuetzten Bild-Formate sind 'jpg' und 'png'!";
+	ERRORMESSAGE4  						"Konnte eine Textur nicht finden! \nStellen sie sicher das der Datei-Pfad dieser texture 'absolut' oder relativ zu dem C4D-Projekt-ordner angegeben ist. Sollten sie nicht sicher sein, Fuehren sie die Funktion 'Datei->Projekt inkl Bestandteile speichern' aus. Das neu gespeicherte Dokument sollte sich nun im Hinblick auf Texturen problemlos exportieren lassen.!";
+	WARNINGMESSAGE3  					"Embed Textures will not be loaded into prefab.\n\n This is a known bug and will be solved soon.\n\nYou can use this File in Away3d without problems.";
 	
-	WARNINGMESSAGE  						"Warnung: Der Export verlief nicht einfandfrei!!!";
-	WARNINGMESSAGE1  						"Materialien-Typ nicht unterstuetzt";
-	WARNINGMESSAGE2  						"Leere Scene kann nicht exportiert werden!";
+	WARNINGMESSAGE  					"Warnung: Der Export verlief nicht einfandfrei!!!";
+	WARNINGMESSAGE1  					"Materialien-Typ nicht unterstuetzt";
+	WARNINGMESSAGE2  					"Leere Scene kann nicht exportiert werden!";
+	    
+	STATUSMESSAGE					    "Status = ";
+	STATUSMESSAGE1						"Bitte speichern Sie ihr Projekt vor dem Export!";
+	STATUSMESSAGE2						"Bereit!";
+	STATUSMESSAGE3						"Erstelle alle AWDBloecke";
+	STATUSMESSAGE4						"Konvertiere Animationen";
+	STATUSMESSAGE5						"Konvertiere Meshes";
+	STATUSMESSAGE6						"Erstelle AWD2-Datei";
 	
-	STATUSMESSAGE							"Status = ";
-	STATUSMESSAGE1							"Sie muessen ihr Projekt speichern, um dieses Plugin nutzen zu koennen!";
-	STATUSMESSAGE2							"Bereit!";
-	STATUSMESSAGE3							"Erstelle alle AWDBloecke";
-	STATUSMESSAGE4							"Konvertiere Animationen";
-	STATUSMESSAGE5							"Konvertiere Meshes";
-	STATUSMESSAGE6							"Erstelle AWD2-Datei";
-	
-	STRING_80PRO					"2013 by 80prozent@differentdesign.de";
+	STRING_80PRO					    "2013 by 80prozent@differentdesign.de";
 }

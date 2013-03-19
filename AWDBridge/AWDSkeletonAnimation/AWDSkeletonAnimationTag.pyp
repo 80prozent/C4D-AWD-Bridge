@@ -24,11 +24,6 @@ class AWDSkeletonAnimationTagXpression(plugins.TagData):
         return True
 
     def Draw(self, tag, op, bd, bh):        
-        if op.GetType()!=Ojoint:
-            tag.Remove()
-            c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-            c4d.EventAdd(c4d.EVENT_ANIMATE)
         return True
 
 # ++++++++++++++++ The Main function. Loads icons, registeres plugins on startup etc. ++++++++++++++++++

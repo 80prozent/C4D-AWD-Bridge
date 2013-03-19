@@ -7,66 +7,102 @@ from c4d import documents
 
 from awdexporter import ids
 from awdexporter import classesAWDBlocks
+from awdexporter import mainHelpers
+from awdexporter import mainSkeletonHelper
 
-   
+# this is the function that gets called from the "mainExporter"
 def createSkeletonBlocks(objList,exportData,mainDialog):
-    for object in objList:
-        skeletonTag=object.GetTag(1028937)
-        if object.GetType()==c4d.Ojoint and skeletonTag is not None:
-            if skeletonTag[1010]==True:
-                if skeletonTag[1011] is not None:
-                    buildSkeleton(exportData,object)
-        skeletonAnimationTag=object.GetTag(1028938)
-        if object.GetType()==c4d.Ojoint and skeletonAnimationTag!=None:
-            if skeletonAnimationTag[1010]==True: 
-                if skeletonAnimationTag[1011] is not None:
-                    buildSkeletonAnimation(exportData,object,mainDialog)
-        if len(object.GetChildren())>0:
-            createSkeletonBlocks(object.GetChildren(),exportData,mainDialog)
+    for object in objList:                                      # for every object do:
+        skeletonTag=object.GetTag(1028937)                          # try to find a "SkeletonTag" on this object 
+        if skeletonTag is not None:                                 # if a "SkeletonTag" is found:
+            if skeletonTag[1010]==True:                                 # if the "SkeletonTag" is enabled for export:
+                if skeletonTag[1011] is not None:                           # if the "SkeletonTag"-Name is not None:
+                    buildSkeleton(exportData,object)                            # build the skeletonBlock
+        skeletonAnimationTag=object.GetTag(1028938)                 # try to find a "SkeletonAnimationTag" on this object  
+        if skeletonAnimationTag is not None:                        # if a "SkeletonAnimationTag" is found:
+            if skeletonAnimationTag[1010]==True:                        # if the "SkeletonAnimationTag" is enabled for export:
+                if skeletonAnimationTag[1011] is not None:                  # if the "SkeletonAnimationTag"-Name is not None:
+                    buildSkeletonAnimation(exportData,object,mainDialog)        # build the SkeletonAnimationBlock
+        if len(object.GetChildren())>0:                             # if the object has any Children:
+            createSkeletonBlocks(object.GetChildren(),exportData,mainDialog)# execute this function again, passing the children as objList
 
+
+    
+# build a new skeletonBlock 
+def buildSkeleton(exportData,curObj):
+    newAWDBlock=classesAWDBlocks.SkeletonBlock(exportData.idCounter,0,curObj.GetTag(1028937)[1011],curObj)  # create a new block for the skeleton
+    exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock                                     # add a dictionary-entrance for the skeletonBlock
+    exportData.allAWDBlocks.append(newAWDBlock)                                                             # append the SkeletonBlock to the allAwdBlocks-list
+    exportData.allSkeletonBlocks.append(newAWDBlock)                                                        # append the SkeletonBlock to the SkeletonBlocks-list    
+    newAWDBlock.name=curObj.GetTag(1028937)[1011]                                                           # set the name of the AWDBlock
+    newAWDBlock.tagForExport=True                                                                           # tag this AWDBlock for export
+    exportData.idCounter+=1                                                                                 # increment the idCounter
+    newSkeleton=mainSkeletonHelper.SkeletonHelper(curObj,None,False)                                        # use the skeletonHelper to check if the skeletonBlock is a valid skeleton
+    weightTags=newSkeleton.allWeightTags                                                                    # get the weighttags that are using this skeleton from the Skeletonhelper
+    if len(weightTags)==0:                                                                                  # if no weightTag is found:
+        newWarning=AWDerrorObject(ids.WARNINGMESSAGE1,tag.GetMaterial().GetName())                              # create a Warning that the Skeleton has no valid binding 
+        exportData.AWDwarningObjects.append(newWarning)                                                         # append the warning to the warnings-list, so it will get displayed when finished
+        
+    buildSkeletonJoint([curObj],newAWDBlock.saveJointList,0,exportData,newAWDBlock)                         # build all the skeleton-joint-blokcs (bindingMatrix etc)
+    for tag in newSkeleton.expressionTagsToRestore:                                                         # after reading the skeleton positions, we enabl
+        tag[c4d.EXPRESSION_ENABLE]=True                                                                         # we enable the expression-tags that have been disabled by the skeletonHelper earlier
+
+#recursive function to create all the jointBlocks for one Skeleton
+def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,skeletonBlock): 
+    for jointObj in jointObjs:
+        newJoint=classesAWDBlocks.jointBlock((len(jointList)+1),parentID,jointObj)          # create a new jointblock
+        exportData.jointIDstoSkeletonBlocks[str(jointObj.GetName())]=skeletonBlock          # create a dictionary-entrance in jointIDStoSkeletonBlocks, so we can get the skeleton this joint is used by, by using the joints name 
+        exportData.jointIDstoJointBlocks[str(jointObj.GetName())]=newJoint                  # create a dictionary-entrance in jointIDstoJointBlocks, so we can get the joints-index  by using its name
+        newJoint.lookUpName=exportData.IDsToAWDBlocksDic[jointObj.GetName()].name           # get the original joint-name
+
+        newJoint.transMatrix=((jointObj.GetMg().__invert__()))                       # set the InversBindMatrix for this Joint        
+        jointList.append(newJoint)                                                          # append this joint-block to the skeletonBlocks-jointList
+        parentID2=(len(jointList))                                                          # get the parentID to use for the next joints 
+        if len(jointObj.GetChildren())>0:                                                   # if the object has any childs:
+            buildSkeletonJoint(jointObj.GetChildren(),jointList,parentID2,exportData,skeletonBlock) # execute the function for the childs 
+
+# build a skeletonAnimationBlock
 def buildSkeletonAnimation(exportData,curObj,mainDialog):   
-    #print "Build Skeleton Animation ###################"
-    minFrame=mainDialog.GetReal(ids.REAL_FIRSTFRAME)
-    maxFrame=mainDialog.GetReal(ids.REAL_LASTFRAME)
-    curFrame=minFrame
-    durationList=[]
-    idList=[]
-    track=curObj.GetFirstCTrack()
-    if track==None:
-        durationList.append(1*c4d.documents.GetActiveDocument().GetFps())
-        idList.append(buildSkeletonPose(exportData,curObj,c4d.BaseTime((curFrame*c4d.documents.GetActiveDocument().GetFps())/1000)))
-        buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)
-        return 
-    curve=track.GetCurve()
-    keyCounter=0
-    print "MinFarme = "+str(minFrame)+"  / MinFarme = "+str(maxFrame)+"  / allFrames = "+str(curve.GetKeyCount())
-    while keyCounter<curve.GetKeyCount():  
-        key=curve.GetKey(keyCounter)    
-        exportData.allStatus+=float(10/float(curve.GetKeyCount()))
-        mainDialog.updateCanvas()
-        if key.GetTime().GetFrame(c4d.documents.GetActiveDocument().GetFps())>=minFrame and key.GetTime().GetFrame(c4d.documents.GetActiveDocument().GetFps())<=maxFrame:
-            if (keyCounter+1)<curve.GetKeyCount():
+    minFrame=mainDialog.GetReal(ids.REAL_FIRSTFRAME)                                                            # get the first frame of the animation range
+    maxFrame=mainDialog.GetReal(ids.REAL_LASTFRAME)                                                             # get the last frame of the animation range
+    curFrame=minFrame                                                                                           # set the first frame to be the current frame
+    durationList=[]                                                                                             # list to store all frame-durations
+    idList=[]                                                                                                   # list to store all frame-IDs
+    track=curObj.GetFirstCTrack()                                                                               # get the first track of the curObj
+    if track==None:                                                                                             # if no track is found
+        durationList.append(1*exportData.doc.GetFps())                                                              # set only one duration
+        idList.append(buildSkeletonPose(exportData,curObj,c4d.BaseTime((curFrame*exportData.doc.GetFps())/1000)))   # add one skeletonPoseBlock to the idLis
+        buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)                                          # create a SkeletonAnimationBlock containing only one Frame
+        return                                                                                                      # exit this function
+    curve=track.GetCurve()                                                                                      # get the curve for this track
+    keyCounter=0   
+    keyCount=curve.GetKeyCount()                                                                                # get key-Count of the Curve
+    while keyCounter<keyCount:                                                                                  # iterate over the keyCount
+        key=curve.GetKey(keyCounter)                                                                                # get a key
+        exportData.allStatus+=float(10/float(curve.GetKeyCount()))                                                  # used to calculate processbar
+        mainHelpers.updateCanvas(mainDialog,exportData)                                                             # update processbar
+        # if the keys time is within the range to export:
+        if key.GetTime().GetFrame(exportData.doc.GetFps())>=minFrame and key.GetTime().GetFrame(exportData.doc.GetFps())<=maxFrame:
+            if (keyCounter+1)<curve.GetKeyCount():# if this is not the last key, we calculate the duration-time like this: durationTime = nextKeyTime - thisKeyTime
                 durationList.append(float(curve.GetKey(keyCounter+1).GetTime().Get())-float(key.GetTime().Get()))
-            if (keyCounter+1)>=curve.GetKeyCount():
-                durationList.append(1*c4d.documents.GetActiveDocument().GetFps())
-            idList.append(buildSkeletonPose(exportData,curObj,key.GetTime()))
+            if (keyCounter+1)>=curve.GetKeyCount():# if this is the last keyframe within the range, we manually set its duration
+                durationList.append(1*exportData.doc.GetFps())
+            idList.append(buildSkeletonPose(exportData,curObj,key.GetTime()))# create the new poseBlock for this frame
         keyCounter+=1
-    buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)
-
-
+    buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)                                          # create the SkeletonAnimationBlock 
 
 def buildSkeletonAnimationBlock(exportData,curObj,durationList,idList):   
-    newAWDBlock=classesAWDBlocks.SkeletonAnimationBlock(exportData.idCounter,0,curObj.GetTag(1028938)[1011],len(durationList))
+    newAWDBlock=classesAWDBlocks.SkeletonAnimationBlock(exportData.idCounter,0,curObj.GetTag(1028938)[1011],len(durationList)) # create a new AWDSkeletonAnimationBlock
     exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
     exportData.allAWDBlocks.append(newAWDBlock)
     newAWDBlock.name=curObj.GetTag(1028938)[1011]
     newAWDBlock.tagForExport=True
     newAWDBlock.framesDurationsList=durationList
     newAWDBlock.framesIDSList=idList
-    #print "sgsgsgsgsg "+str(len(idList))
     exportData.idCounter+=1
     exportData.allSkeletonAnimations.append(newAWDBlock)
 
+# creates a new SkeletonPoseBlock - called by "buildSkeletonAnimation()"
 def buildSkeletonPose(exportData,curObj,curTime):   
     newAWDBlock=classesAWDBlocks.SkeletonPoseBlock(exportData.idCounter,0,curObj.GetTag(1028938)[1011])
     exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
@@ -74,49 +110,23 @@ def buildSkeletonPose(exportData,curObj,curTime):
     newAWDBlock.name=curObj.GetTag(1028938)[1011]
     exportData.idCounter+=1
     newAWDBlock.tagForExport=True
-    c4d.documents.SetDocumentTime(c4d.documents.GetActiveDocument(), curTime)# set original Time
-    c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
+    c4d.documents.SetDocumentTime(exportData.doc, curTime)# set original Time
+    c4d.DrawViews( c4d.DRAWFLAGS_FORCEFULLREDRAW|c4d.DRAWFLAGS_NO_THREAD|c4d.DRAWFLAGS_NO_REDUCTION|c4d.DRAWFLAGS_STATICBREAK )
     c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
     c4d.EventAdd(c4d.EVENT_ANIMATE)
     newAWDBlock.transformations=[]
-    buildJointTransform([curObj],newAWDBlock.transformations)
+    buildJointTransform([curObj],newAWDBlock.transformations,exportData) # recursive function to get all Joints as JointBlocks
     return newAWDBlock.blockID
-    #
-def buildJointTransform(curObjList,jointTransforms):   
+    
+# saves the skeleton-joint-matricies while playing trough timeline - called by "buildSkeletonPose()"
+def buildJointTransform(curObjList,jointTransforms,exportData):   
     for curObj in curObjList:
-        jointTransforms.append(curObj.GetMl())
+        newMatrix=curObj.GetMl()
+        newMatrix.off=newMatrix.off*exportData.scale
+        jointTransforms.append(newMatrix)
         if len(curObj.GetChildren())>0:
-            buildJointTransform(curObj.GetChildren(),jointTransforms)
+            buildJointTransform(curObj.GetChildren(),jointTransforms,exportData)
+            
+    
 
-def buildSkeleton(exportData,curObj):
-    newAWDBlock=classesAWDBlocks.SkeletonBlock(exportData.idCounter,0,curObj.GetTag(1028937)[1011],curObj)
-    exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
-    exportData.allAWDBlocks.append(newAWDBlock)
-    exportData.allSkeletonBlocks.append(newAWDBlock)
-    newAWDBlock.name=curObj.GetTag(1028937)[1011]
-    newAWDBlock.tagForExport=True
-    exportData.idCounter+=1
-    buildSkeletonJoint([curObj],newAWDBlock.saveJointList,0,exportData,newAWDBlock)
-        
-    #newAWDBlock.dataParentBlockID=0
-    #if curObj.GetUp():
-    #	newAWDBlock.dataParentBlockID=int(curObj.GetUp().GetName())
-    #curObj.SetName(str(exportData.idCounter))
-    #exportData.idCounter+=1
-
-def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,newAWDBlock): 
-    for jointObj in jointObjs:
-        parentID2=parentID
-        exportData.jointIDstoSkeletonBlocks[str(jointObj.GetName())]=newAWDBlock
-        newJoint=classesAWDBlocks.jointBlock((len(jointList)+1),parentID2,jointObj)
-        exportData.jointIDstoJointBlocks[str(jointObj.GetName())]=newJoint
-        parentID2=(len(jointList)+1)
-        newJoint.lookUpName=exportData.IDsToAWDBlocksDic[jointObj.GetName()].name
-        #print "matrix = "+str(jointObj.GetMg())
-        #print "inv matrix = "+str(jointObj.GetMg().__invert__())
-        bindMatrix=jointObj.GetMg().__invert__()#.GetNormalized()
-        newJoint.transMatrix=bindMatrix#
-        jointList.append(newJoint)
-        if len(jointObj.GetChildren())>0:
-            buildSkeletonJoint(jointObj.GetChildren(),jointList,parentID2,exportData,newAWDBlock)
 

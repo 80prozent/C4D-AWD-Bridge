@@ -8,11 +8,38 @@ from awdexporter import mainExporter
 
 from awdexporter import maindialogPresets
 from awdexporter import maindialogHelpers
+from awdexporter import mainSkeletonHelper
+from awdexporter import maindialogCreator
 
 workerThread=None
 exportData=None
 enableObjects=[]
 enableStates=[]
+class AboutDialog(c4d.gui.GeDialog):
+    BUTTON_ID = 1001
+    def CreateLayout(self):
+        self.TabGroupBegin(1003,c4d.BFH_CENTER|c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,c4d.TAB_TABS)    
+        #Group Level 2
+        self.GroupBegin(1003,c4d.BFH_CENTER|c4d.BFV_CENTER|c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,1,1,"About")#c4d.plugins.GeLoadString(ids.TABGRP_GENERAL))
+        view=self.AddCustomGui(1001, c4d.CUSTOMGUI_HTMLVIEWER, "", c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT, 400, 400, c4d.BaseContainer())
+        view.SetUrl(os.path.join(os.path.dirname(__file__), "res",  "123456"), c4d.URL_ENCODING_UTF16)
+        self.GroupEnd()
+        self.GroupEnd()
+        return True        
+    def Command(self, id, msg):
+        #self.Close()
+        return True
+class HelpDialog(c4d.gui.GeDialog):
+    BUTTON_ID = 1001
+    def CreateLayout(self):
+        self.TabGroupBegin(1003,c4d.BFH_CENTER|c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT,c4d.TAB_TABS)   
+        view=self.AddCustomGui(1001, c4d.CUSTOMGUI_HTMLVIEWER, "", c4d.BFH_SCALEFIT|c4d.BFV_SCALEFIT, 400, 400, c4d.BaseContainer())
+        view.SetUrl(os.path.join(os.path.dirname(__file__), "res",  "123456"), c4d.URL_ENCODING_UTF16)
+        self.GroupEnd()
+        return True        
+    def Command(self, id, msg):
+        #self.Close()
+        return True
 
 # this class is C4DThread Class, and will be executed to have calculated the mesh-converting in other thread than the c4d main thread
 class WorkerThread(c4d.threading.C4DThread):    
@@ -23,10 +50,13 @@ class WorkerThread(c4d.threading.C4DThread):
             workerExporter.startWorkerExport(exportData,self)                
             c4d.StatusClear()
 
+
+
+# the main Dialog class. this class contains the functions to create and handle the dialog.
 class MainDialog(c4d.gui.GeDialog):
        
-    doc = c4d.documents.GetActiveDocument()
 
+    workerAction=None
     userarea = None
     awdExporterData=None 
     sliderEditor = 1.0
@@ -41,181 +71,132 @@ class MainDialog(c4d.gui.GeDialog):
     compressData = False
     debug = False
     closeAfter = False
-
+    
+    docName=None
+    
+    firstFrame=0
+    lastFrame=0
+    firstFrameUser=0
+    lastFrameUser=0
     textures=0
     copyTextures=False
     texturesURL=""
-    firstFrame = doc.GetMinTime().GetFrame(doc.GetFps())
-    lastFrame = doc.GetMaxTime().GetFrame(doc.GetFps())
     animationBool = False
     animationRange = int(0)
+    openInPreFab = False
         
-    def __init__(self):   
+    def __init__(self): 
+        doc=c4d.documents.GetActiveDocument()
+        if doc:
+            if self.docName!=doc.GetDocumentPath():
+                self.docName=doc.GetDocumentPath()
+                self.firstFrame = doc.GetMinTime().GetFrame(doc.GetFps())
+                self.lastFrame = doc.GetMaxTime().GetFrame(doc.GetFps())
         self.userarea = classCanvas.Canvas()
         
     def CreateLayout(self):      
-        self.MenuFlushAll()
-        self.MenuSubBegin(c4d.plugins.GeLoadString(ids.MENU_PRESET))
-        self.MenuAddString(ids.MENU_PRESET_LOAD, c4d.plugins.GeLoadString(ids.MENU_PRESET_LOAD))
-        self.MenuAddString(ids.MENU_PRESET_SAVE, c4d.plugins.GeLoadString(ids.MENU_PRESET_SAVE))
-        self.MenuSubEnd()
-        self.MenuSubBegin(c4d.plugins.GeLoadString(ids.MENU_ABOUT))
-        self.MenuAddString(ids.MENU_ABOUT_HELP, c4d.plugins.GeLoadString(ids.MENU_ABOUT_HELP))
-        self.MenuAddString(ids.MENU_ABOUT_ABOUT, c4d.plugins.GeLoadString(ids.MENU_ABOUT_ABOUT))
-        self.MenuSubEnd()
-        self.MenuFinished()
+        #icon2 = c4d.bitmaps.BaseBitmap()
+        #icon2.InitWith(os.path.join(os.path.dirname(__file__), "res", "pic.jpg"))    
+        #bc = c4d.BaseContainer()                         
+        #bc.SetLong(c4d.BITMAPBUTTON_ICONID1, 1390382) 
+        #bc.SetBool(c4d.BITMAPBUTTON_BUTTON, True)
+        #self.myBitButton = self.AddCustomGui(1390382, c4d.CUSTOMGUI_BITMAPBUTTON, "Bend", c4d.BFH_CENTER | c4d.BFV_CENTER, 32, 32, bc)
+        #self.myBitButton = c4d.gui.BitmapButtonCustomGui 
+        maindialogCreator.createLayout(self)
+        #dialogLoadet=self.LoadDialogResource(ids.MAINDIALOG, None, flags= c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT )  
+        mainHelpers.updateCanvas(self,exportData)
+        maindialogHelpers.InitValues(self)     
+        return True
 
-        icon2 = c4d.bitmaps.BaseBitmap()
-        icon2.InitWith(os.path.join(os.path.dirname(__file__), "res", "pic.jpg"))    
-        bc = c4d.BaseContainer()                         
-        bc.SetLong(c4d.BITMAPBUTTON_ICONID1, 1390382) 
-        bc.SetBool(c4d.BITMAPBUTTON_BUTTON, True)
-        self.myBitButton=self.AddCustomGui(1390382, c4d.CUSTOMGUI_BITMAPBUTTON, "Bend", c4d.BFH_CENTER | c4d.BFV_CENTER, 32, 32, bc)
-        self.myBitButton = c4d.gui.BitmapButtonCustomGui 
-        dialogLoadet=self.LoadDialogResource(ids.MAINDIALOG, None, flags= c4d.BFH_SCALEFIT | c4d.BFV_SCALEFIT )  
-        self.AttachUserArea(self.userarea,
-                            ids.MAINDIALOG_USERAREA,
-                            c4d.USERAREA_COREMESSAGE)
-        self.updateCanvas()
-        if dialogLoadet==True:
-            maindialogHelpers.InitValues(self)     
-            return True
-
-    def updateCanvas(self):         
-        global exportData    
-        doc=c4d.documents.GetActiveDocument()
-        if doc==None:
-            statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
-            self.userarea.draw([statusStr,0,0])
-            return
-        if doc!=None:
-            if doc.GetDocumentPath()==None or doc.GetDocumentPath()=="":
-                statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
-                self.userarea.draw([statusStr,0,0])
-                return
-            if exportData==None:
-                statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE2)
-                self.userarea.draw([statusStr,0,0])
-                return
-            if exportData.status==0:
-                statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE3)
-                self.userarea.draw([statusStr,0,0])
-                return
-            curPercent=float(float(exportData.allStatus)/float(exportData.allStatusLength))
-            c4d.StatusSetBar(curPercent)
-            if exportData.status==1:
-                statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE4)+"  "+str(int(curPercent*100))+" %"
-                self.userarea.draw([statusStr,curPercent,0])     
-                return
-            if exportData.status==2:
-                statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE5)+"  "+str(int(curPercent*100))+" %"
-                self.userarea.draw([statusStr,curPercent,float(exportData.subStatus)])
-                return
-            if exportData.status==3:
-                statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE6)+"  "+str(int(curPercent*100))+" %"
-                self.userarea.draw([statusStr,curPercent,0])
-                return
+                
     def CoreMessage(self, msg, result):
-        self.updateCanvas()
-        return True
-
-
-            
-    def Timer(self, msg):
-        global exportData
+        if msg==c4d.EVMSG_BROWSERCHANGE:
+            print "JA"
+        mainHelpers.updateCanvas(self,exportData)#update the status-canvas
         doc=c4d.documents.GetActiveDocument()
-        op=doc.GetActiveObject()
-        if workerThread.IsRunning():
-            self.updateCanvas()
-            pass
-        if not workerThread.IsRunning():         
-            mainHelpers.deleteCopiedMeshes(exportData.allMeshObjects)
-            if len(exportData.AWDerrorObjects)>0:  
-                newMessage=c4d.plugins.GeLoadString(ids.ERRORMESSAGE)+"\n"
-                for errorMessage in exportData.AWDerrorObjects:
-                    newMessage+=c4d.plugins.GeLoadString(errorMessage.errorID)
-                    if errorMessage.errorData!=None:
-                        newMessage+="\n\n"+str(c4d.plugins.GeLoadString(ids.ERRORMESSAGEOBJ))+" = "+str(errorMessage.errorData)
-                c4d.gui.MessageDialog(newMessage)
-                if self.GetBool(ids.CBOX_CLOSEAFTEREXPORT) == True:  
-                    exportData=None
-                    c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-                    c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-                    c4d.EventAdd(c4d.EVENT_ANIMATE) 
-                    self.Close()
-                    return True  
-                exportData=None
-                c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-                c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-                c4d.EventAdd(c4d.EVENT_ANIMATE) 
-                return True  
-            if len(exportData.AWDwarningObjects)>0:  
-                newMessage=c4d.plugins.GeLoadString(ids.WARNINGMESSAGE)+"\n"
-                for errorMessage in exportData.AWDwarningObjects:
-                    newMessage+=c4d.plugins.GeLoadString(errorMessage.errorID)
-                    if errorMessage.errorData!=None:
-                        newMessage+="AWDWarningObject: "+str(errorMessage.errorData)
-                print "Warning "+str(newMessage)
-                if self.GetBool(ids.CBOX_CLOSEAFTEREXPORT) == True:  
-                    exportData=None
-                    c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-                    c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-                    c4d.EventAdd(c4d.EVENT_ANIMATE) 
-                    self.Close()    
-                    return True  
-            if self.GetBool(ids.CBOX_CLOSEAFTEREXPORT) == True and exportData.cancel!=True:  
-                exportData=None
-                c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-                c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-                c4d.EventAdd(c4d.EVENT_ANIMATE) 
-                self.Close()
-                return True  
-            exportData=None
-            c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-            c4d.EventAdd(c4d.EVENT_ANIMATE) 
-            maindialogHelpers.enableAll(self,True)
-            print c4d.plugins.GeLoadString(ids.SUCCESSMESSAGE)
-            self.SetTimer(0)
-       
-    def printErrors(self):  
-        global exportData
-        if len(exportData.AWDerrorObjects)>0:  
-            maindialogHelpers.enableAll(self,True)
-            newMessage=c4d.plugins.GeLoadString(ids.ERRORMESSAGE)+"\n"
-            for errorMessage in exportData.AWDerrorObjects:
-                newMessage+=c4d.plugins.GeLoadString(errorMessage.errorID)
-                if errorMessage.errorData!=None:
-                    newMessage+="\n\n"+str(c4d.plugins.GeLoadString(ids.ERRORMESSAGEOBJ))+" = "+str(errorMessage.errorData)
-            c4d.gui.MessageDialog(newMessage)
-            exportData=None
-            if self.GetBool(ids.CBOX_CLOSEAFTEREXPORT) == True:  
-                exportData=None
-                c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-                c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-                c4d.EventAdd(c4d.EVENT_ANIMATE) 
-                self.Close()
-            c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-            c4d.EventAdd(c4d.EVENT_ANIMATE)  
-            exportData=None  
-            return False   
+        if doc:
+            isDirty=False
+            if self.GetLong(ids.COMBO_RANGE)==0:
+                if self.firstFrame != doc.GetMinTime().GetFrame(doc.GetFps()):
+                    isDirty=True
+                if self.lastFrame != doc.GetMaxTime().GetFrame(doc.GetFps()):
+                    isDirty=True
+            if self.GetLong(ids.COMBO_RANGE)==1:
+                if self.firstFrame != doc.GetLoopMinTime().GetFrame(doc.GetFps()):
+                    isDirty=True
+                if self.lastFrame != doc.GetLoopMaxTime().GetFrame(doc.GetFps()):
+                    isDirty=True
+            if self.docName!=doc.GetDocumentPath():
+                self.docName=doc.GetDocumentPath()
+                isDirty=True                   
+            if isDirty==True:
+                maindialogHelpers.setUI(self)
         return True
-
-    def Command(self, id, msg):  
-        global workerThread,exportData
-             
-        self.updateCanvas()
-
-        if id == ids.BTN_CANCEL:
-            workerThread.End()
+      
+    # this function will be executed every 20ms as long as a Background-thread is active
+    def Timer(self, msg):
+        global exportData   # we need this to be global, so we can destroy it if needed
+        if self.workerAction is None:
             self.SetTimer(0)
+            
+        if self.workerAction == "exporting":
+            if workerThread is None:                                                        #this should never happen, but if it happens,
+                exportData=None                                                                 # we destroy the exportData-Object.
+                mainHelpers.updateCanvas(self,exportData)                                       # update the status-canvas
+                print "unexpected Error: Workerthread not found by mainDialog.Timer function"   # and print out a error
+            if workerThread is not None:
+                if workerThread.IsRunning():                                                # while the background-thread is working, 
+                    mainHelpers.updateCanvas(self,exportData)                                   # we update the status-canvas
+                if not workerThread.IsRunning():                                            # if the background-thread is not working 
+                    mainExporter.endExport(self,exportData)                                     # we call the function to end the export-processing                      
+                    exportData=None                                                             # destroy the exportData-object
+                    mainHelpers.updateCanvas(self,exportData)                                   # and update the status-canvas
+        if self.workerAction == "meshChecking":
+            print "worker2"
+
+
+    # this function will be executed every time a GUI-Element is changed by the user
+    # using the global-IDs of the GUI-Elements, we can check which Element was changed, and react...
+    def Command(self, id, msg):  
+        global workerThread,exportData             
+        mainHelpers.updateCanvas(self,exportData)       
+        
+        if id == ids.BTN_CHECKSKELETON:                 # check Skeleton was hit:                
+            op=mainHelpers.checkforValidSelectedSkeleton()
+            if op is not None:  
+                doc=c4d.documents.GetActiveDocument()
+                doc.StartUndo()                     # Start undo support
+                doc.AddUndo(c4d.UNDOTYPE_CHANGE, op) # Support redo the insert operation
+                checkSkeleton=mainSkeletonHelper.SkeletonHelper(op) # we create a SkeletonHelper-Object to check if the selected object is a valid skeleton
+                doc.EndUndo()                       # Do not forget to close the undo support 
+                return True
+            c4d.gui.MessageDialog("To use this function, you need to select one Object that has Child-Objects\n,or one SkeletonTag,or one SkeletonAnimationTag")   
+        if id == ids.BTN_CREATESKELETONANIMATION:                 # check Skeleton was hit:                
+            op=mainHelpers.checkforValidSelectedSkeleton()
+            if op is not None:        
+                mainHelpers.copySkeletonAndApplySkeletonAnimation(op) # we create a SkeletonHelper-Object to check if the selected object is a valid skeleton
+                return True
+            c4d.gui.MessageDialog("To use this function, you need to select one SkeletonTag, or one Object that has a SkeletonTag applied!")  
+                
+        if id == ids.BTN_SAVEWITHASSETS:        # Save with assets was hit: 
+            c4d.CallCommand(12255)                  # we just call the command "Save C4D-Scene with Assets"           
+        
+        if id == ids.BTN_CANCEL:                # cancel Button was hit: cancel export process:   
+            print "User cancelled the export-process"
+            self.SetTimer(0)
+            self.workerAction=None
+            if workerThread is not None:
+                if workerThread.IsRunning()==True:
+                    workerThread.End()
             exportData=None
-            self.updateCanvas()
+            mainHelpers.updateCanvas(self,exportData)
             maindialogHelpers.enableAll(self,True)
-            return True
-        if id == ids.BTN_EXPORT:
+            return True            
+       
+        if id == ids.BTN_EXPORT:             # export button was hit: start export process:
+            #check if a valid C4D scene is active, if not we return with error-message
             doc=c4d.documents.GetActiveDocument()
+            self.workerAction="exporting"
             if doc==None:
                 newMessage=c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
                 c4d.gui.MessageDialog(newMessage)
@@ -224,46 +205,64 @@ class MainDialog(c4d.gui.GeDialog):
                 newMessage=c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
                 c4d.gui.MessageDialog(newMessage)
                 return True
-            exportData=mainExporter.startExport(self) 
-            self.printErrors() 
-            if exportData!=None:
-                workerThread  = WorkerThread()
-                workerThread.Start() 
-                self.SetTimer(20)
-            if exportData==None:
-                self.SetTimer(0)  
+            
+            exportData=mainExporter.startExport(self,doc)       # start the export-process thats done in the c4d-main-Thread         
+            mainHelpers.printErrors(self,exportData)                              # if any errors occured, print them out and delete the "exportData"-object
+            if exportData!=None:                            # if the exportData object is still alive, no error has occured
+                workerThread  = WorkerThread()                  # recreated the workerThread (open a new c4d-thread for the heavy mesh-processing)
+                workerThread.Start()                            # start the workerThread
+                self.SetTimer(20)                               # start the timer-function to monitor the workerThread
+            if exportData==None:                            # if the export data is not alive, a error has occured
+                self.SetTimer(0)                                # stop the timer-function
               
         if id == ids.CBOX_ANIMATION: 
             self.animationBool=self.GetBool(ids.CBOX_ANIMATION)
-            maindialogHelpers.setValues(self)  
-            maindialogHelpers.setUI(self)
-        if id == ids.LINK_EXTERNTEXTURESPATH: 
-            self.texturesURL=self.GetString(ids.LINK_EXTERNTEXTURESPATH)
-            maindialogHelpers.setValues(self)
+        if id == ids.CBOX_CLOSEAFTEREXPORT: 
+            self.closeAfter=self.GetBool(ids.CBOX_CLOSEAFTEREXPORT)
+        if id == ids.CBOX_UNUSEDMATS: 
+            self.unusedMats=self.GetBool(ids.CBOX_UNUSEDMATS)
+            
         if id == ids.CBOX_STREAMING: 
             self.streaming=self.GetBool(ids.CBOX_STREAMING)
             if self.streaming==True:
                 self.SetBool(ids.CBOX_COMPRESSED,False)
                 self.compressData=False
+            maindialogHelpers.setUI(self)  
+                
         if id == ids.CBOX_COMPRESSED: 
-            self.streaming=self.GetBool(ids.CBOX_COMPRESSED)
+            self.compressData=self.GetBool(ids.CBOX_COMPRESSED)
             if self.compressData==True:
                 self.SetBool(ids.CBOX_STREAMING,False)
                 self.streaming=False
+            maindialogHelpers.setUI(self)  
+            
+        if id == ids.CBOX_DEBUG:  
+            self.debug=self.GetBool(ids.CBOX_DEBUG)
+            
+        if id == ids.CBOX_OPENPREFAB:  
+            self.openInPreFab=self.GetBool(ids.CBOX_OPENPREFAB)
+            
         if id == ids.COMBO_RANGE: 
             self.animationRange=self.GetLong(ids.COMBO_RANGE)
             maindialogHelpers.setUI(self)
+            
         if id == ids.COMBO_TEXTURESMODE: 
             maindialogHelpers.setValues(self)   
             maindialogHelpers.setUI(self)
            
-        if id == ids.MENU_PRESET_LOAD:   
-            exportResult=maindialogPresets.loadPreset(self)  
-        maindialogHelpers.setValues(self)     
-        if id == ids.MENU_PRESET_SAVE:   
-            exportResult=maindialogPresets.savePreset(self) 
-              
-        #self.setUI()     
+        if id == ids.MENU_ABOUT_ABOUT: 
+
+            dlg = AboutDialog()
+            #DLG_TYPE_MODAL = > synchronous dialog
+            #DLG_TYPE_ASYNC = > asynchronous dialogs
+            dlg.Open(dlgtype=c4d.DLG_TYPE_MODAL, defaultw=300, defaulth=300)
+            
+        if id == ids.MENU_ABOUT_HELP: 
+            dlg = HelpDialog()
+            #DLG_TYPE_MODAL = > synchronous dialog
+            #DLG_TYPE_ASYNC = > asynchronous dialogs
+            dlg.Open(dlgtype=c4d.DLG_TYPE_ASYNC, defaultw=400, defaulth=400)
+                 
         return True  
     
     """

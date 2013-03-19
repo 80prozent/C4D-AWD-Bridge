@@ -4,8 +4,28 @@ from c4d import documents
 
 from awdexporter import ids
 from awdexporter import classesAWDBlocks
-from awdexporter import mainHelpers
+from awdexporter import mainMaterials
 
+def createAllSceneBlocks(exportData,objList,parentExportSettings=None,tagForExport=True,returner=True):
+    for object in objList:
+        exporterSettingsTag=object.GetTag(1028905)
+        thisExporterSettings=parentExportSettings
+        exportThisObj=True
+        returnerAR=[False,False]
+        if exporterSettingsTag==None:
+            returnerAR=createSceneBlock(exportData,object,tagForExport,returner,False)
+            
+        if exporterSettingsTag!=None:
+            if exporterSettingsTag[1014]==False and exporterSettingsTag[1016]== True:
+                pass
+            if exporterSettingsTag[1014]==True and exporterSettingsTag[1016]== True:
+                returnerAR=createSceneBlock(exportData,object,tagForExport,returner,False)
+            if exporterSettingsTag[1014]==True and exporterSettingsTag[1016]== False:
+                returnerAR=createSceneBlock(exportData,object,tagForExport,returner,False)
+            if exporterSettingsTag[1014]==False and exporterSettingsTag[1016]== False:
+                returnerAR=createSceneBlock(exportData,object,tagForExport,returner,True)
+        if returnerAR[0]==True:
+            createAllSceneBlocks(exportData,object.GetChildren(),thisExporterSettings,returnerAR[1],returnerAR[0])
 #function check the object-type of a c4d-object and creates a corresponding AWDBlock (see classesAWDBlocks) 
 def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject=False):  
   
@@ -85,6 +105,8 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
             newAWDBlock.tagForExport=tagForExport
             curObj.SetName(str(exportData.idCounter))
             newAWDBlock.dataParentBlockID=0
+            if curObj.GetTag(1019365):
+                newAWDBlock.isSkinned=True
             if curObj.GetUp():
                 parentID=exportData.IDsToAWDBlocksDic.get(str(curObj.GetUp().GetName()),None)
                 if parentID!=None:
@@ -92,7 +114,7 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
                 
                     
             exportData.idCounter+=1
-            materials=mainHelpers.getObjectsMaterials(curObj,None,newAWDBlock)
+            materials=mainMaterials.getObjectsMaterials(curObj,None,newAWDBlock)
             for mat in materials:
                 newAWDBlock.saveMaterials.append(mat[0])
     

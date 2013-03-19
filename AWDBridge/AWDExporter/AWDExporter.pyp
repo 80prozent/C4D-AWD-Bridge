@@ -18,6 +18,9 @@ if folder not in sys.path:
 from awdexporter import ids
 from awdexporter import cmddata
 from awdexporter import maindialog
+from awdexporter import mainHelpers   
+from awdexporter import mainExporter
+from awdexporter import maindialogCreator
  
 # listen for any C4D internal messages that will indicate that the background-thread have to be closed 
 def PluginMessage(id, data):
@@ -33,6 +36,9 @@ def PluginMessage(id, data):
 
 # this needs to be done for each module that needs to acces the "c4d.plugins.GeLoadString(id)"
 maindialog.__res__ = __res__
+mainExporter.__res__ = __res__
+mainHelpers.__res__ = __res__
+maindialogCreator.__res__ = __res__
 
 # main plugin code:
 if __name__ == "__main__":

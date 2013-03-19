@@ -7,11 +7,15 @@ import os
 import zlib
 from awdexporter import ids
 from awdexporter import classesHelper
+from awdexporter import workerReorderBlocks
 
 # called by "WorkerExporter.py"
 def getAllObjectData(exportData):
     for awdSceneBlock in exportData.allSceneObjects:
-        awdSceneBlock.dataMatrix=awdSceneBlock.sceneObject.GetMl()
+        dataMatrix=awdSceneBlock.sceneObject.GetMl()
+        if awdSceneBlock.isSkinned==True:
+            pass#dataMatrix=c4d.Matrix()
+        awdSceneBlock.dataMatrix=dataMatrix
 		
 # called by "WorkerExporter.py"
 # creates the final binary string and saves it to harddisc
@@ -40,29 +44,34 @@ def exportAllData(exportData):
         f = open(datei, 'wb')
         f.write(outputBits)
         f.close()
+        if exportData.openPrefab==True:
+            if exportData.embedTextures==0:                
+                newWarning=classesHelper.AWDerrorObject(ids.WARNINGMESSAGE3)
+                exportData.AWDwarningObjects.append(newWarning)
+            c4d.storage.GeExecuteFile(datei)
     return
 	
 def reorderAllBlocks(exportData):
     for awdBlock in exportData.allAWDBlocks:
-        exportData.addToExportList(awdBlock)
+        workerReorderBlocks.addToExportList(exportData,awdBlock)
     for awdSkeleton in exportData.allSkeletonBlocks:
-        exportData.addSkeleton(awdSkeleton)
+        workerReorderBlocks.addSkeleton(exportData,awdSkeleton)
     for awdSkeletonAnimation in exportData.allSkeletonAnimations:
-        exportData.addSkeletonAnimation(awdSkeletonAnimation)
+        workerReorderBlocks.addSkeletonAnimation(exportData,awdSkeletonAnimation)
 
 def connectInstances(exportData):
     for instanceBlock in exportData.unconnectedInstances:
         geoInstanceID=instanceBlock.sceneObject[c4d.INSTANCEOBJECT_LINK].GetName()
         instanceSceneBlock=exportData.IDsToAWDBlocksDic.get(str(geoInstanceID),None)
         instanceBlock.geoBlockID=instanceSceneBlock.geoBlockID
-        if instanceSceneBlock.hasTexture==True:
-            materials=getObjectsMaterials(instanceSceneBlock.sceneObject)
-        if instanceSceneBlock.hasTexture==False:
+        if True:#instanceSceneBlock.hasTexture==True:
+            #materials=getObjectsMaterials(instanceSceneBlock.sceneObject)
+        #if instanceSceneBlock.hasTexture==False:
             allSelections=[] 
             for selectionTag in instanceSceneBlock.sceneObject.GetTags(): 
                 if selectionTag.GetType()==c4d.Tpolygonselection:
-                    allSelections.append(mainHelpers.PolySelection(selectionTag.GetName(),selectionTag.GetBaseSelect().GetAll(len(instanceSceneBlock.sceneObject.GetAllPolygons())))) 
-            materials=mainHelpers.getObjectsMaterials(instanceBlock.sceneObject,allSelections)
+                    allSelections.append(classesHelper.PolySelection(selectionTag.GetName(),selectionTag.GetBaseSelect().GetAll(len(instanceSceneBlock.sceneObject.GetAllPolygons())))) 
+            materials=getObjectsMaterials(instanceBlock.sceneObject,allSelections)
         for mat in materials:
             instanceBlock.saveMaterials.append(mat[0])
 	

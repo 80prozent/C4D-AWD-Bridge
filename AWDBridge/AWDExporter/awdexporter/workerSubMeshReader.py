@@ -27,11 +27,11 @@ def prepareSubmeshIndexe(meshBlock):
             unselectedIndexe.append(1) 
     meshBlock.saveSubMeshes[0].selectionIndexe=unselectedIndexe
     if hasUnselectedPolys==False:
-        #print "delete first submehs"
+        #print "delete first submesh"
         meshBlock.saveSubMeshes.pop(0)
     return   
-                           
-    #checks if a vert/uv - combination allready exists in the uniquePool or in the uniquePoolMorphed of the given Submesh.
+           
+#checks if a vert/uv - combination allready exists in the uniquePool or in the uniquePoolMorphed of the given Submesh.
 def buildSharedPoint(faceStyle,meshBlock,curMesh,curPoint,curUV,curSubMesh,pointNr,normal,normalf,anglelimit,useAngle,isEdgeBreak):
                     
         
@@ -115,10 +115,14 @@ def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,cur
         jointcounter=0
         weights=[]  
         joints=[] 
-        while jointcounter<curMesh.GetTag(c4d.Tweights).GetJointCount():    
-            if curMesh.GetTag(c4d.Tweights).GetWeight(jointcounter,pointNr)>0:
-                weights.append(curMesh.GetTag(c4d.Tweights).GetWeight(jointcounter,pointNr))
-                joints.append(meshBlock.jointTranslater[jointcounter]) 
+        jointCount=curMesh.GetTag(c4d.Tweights).GetJointCount()
+        while jointcounter<jointCount:   
+            newWeight=curMesh.GetTag(c4d.Tweights).GetWeight(jointcounter,pointNr)
+            if newWeight>0:
+                newIndex=meshBlock.jointTranslater[jointcounter]
+                if newIndex>=0:
+                    weights.append(newWeight)
+                    joints.append(newIndex) 
                 ismorph=False
             jointcounter+=1      
     if ismorph==False:
@@ -138,8 +142,6 @@ def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,cur
             curSubMesh.normalBuffer.append(curNormal)
         if curNormalf is not None:
             curSubMesh.faceNormal.append(curNormalf)
-        if weights is None:
-            print ("jes")
         if weights is not None:
             curSubMesh.weightsBuffer.append(weights)
         if joints!= None:
@@ -162,7 +164,7 @@ def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,cur
 """  
                         
 
-            
+# this is the main - mesh-parsing function....            
 def collectSubmeshData(meshBlock,exportData,workerthreat):
     usePhong=False
     usePhongAngle=False
@@ -171,11 +173,12 @@ def collectSubmeshData(meshBlock,exportData,workerthreat):
     phoneAngle=-1
     normalData=meshBlock.copiedMesh.CreatePhongNormals()
     normalCounter=0
-    if meshBlock.copiedMesh.GetTag(5612):
+    phongTag=meshBlock.copiedMesh.GetTag(c4d.Tphong)
+    if phongTag is not None:
         usePhong=True
-        usePhongAngle=meshBlock.copiedMesh.GetTag(5612)[c4d.PHONGTAG_PHONG_ANGLELIMIT]
-        useEdgeBreaks=meshBlock.copiedMesh.GetTag(5612)[c4d.PHONGTAG_PHONG_USEEDGES]
-        phoneAngle=meshBlock.copiedMesh.GetTag(5612)[c4d.PHONGTAG_PHONG_ANGLE]
+        usePhongAngle=phongTag[c4d.PHONGTAG_PHONG_ANGLELIMIT]
+        useEdgeBreaks=phongTag[c4d.PHONGTAG_PHONG_USEEDGES]
+        phoneAngle=phongTag[c4d.PHONGTAG_PHONG_ANGLE]
         if useEdgeBreaks==True:
             edgebreaks=meshBlock.copiedMesh.GetPhongBreak()
         
@@ -186,32 +189,25 @@ def collectSubmeshData(meshBlock,exportData,workerthreat):
     polys=meshBlock.copiedMesh.GetAllPolygons()
     count=len(polys)
     count2=float(10/float(count))
-    for faceIndex in xrange(count): 
-        if workerthreat.TestBreak():
-            return
-        exportData.subStatus=float(float(faceIndex)/float(count))
-        exportData.allStatus+=count2
-        oldpoints=polys[faceIndex]
-        if meshBlock.copiedMesh.GetTag(5671):
-            uv =meshBlock.copiedMesh.GetTag(5671).GetSlow(faceIndex)
+    for faceIndex in xrange(count):                                     # iterate trough all polygons 
+        if workerthreat.TestBreak():                                        # if the user cancelled the export, 
+            return                                                              # we return
+        exportData.subStatus=float(float(faceIndex)/float(count))           # used to update the progress bar
+        exportData.allStatus+=count2                                        # used to update the progress bar
+        oldpoints=polys[faceIndex]                                          # store the original point-indicies
+        uvTag=meshBlock.copiedMesh.GetTag(c4d.Tuvw)                         # get the first UV-Tag applied to the mesh
+        if uvTag is not None:                                               # if a UV-Tag is found,  
+            uv = uvTag.GetSlow(faceIndex)                                       # we get the UVs for the Polygon and store them in "uv"
         subcount=0
-        for subcount in xrange(len(meshBlock.saveSubMeshes)):
-            
-            if meshBlock.saveSubMeshes[subcount].selectionIndexe[faceIndex]==1:  
-                 
-                uva=None
-                uvb=None
-                uvc=None
-                uvd=None
+        for subcount in xrange(len(meshBlock.saveSubMeshes)):            
+            if meshBlock.saveSubMeshes[subcount].selectionIndexe[faceIndex]==1:                   
+                uva=uvb=uvc=uvd=None
                 if meshBlock.copiedMesh.GetTag(5671):
                     uva=uv["a"]
                     uvb=uv["b"]
                     uvc=uv["c"]
-                    uvd=uv["d"]
-                normala=None
-                normalb=None
-                normalc=None
-                normald=None
+                    uvd=uv["d"]              
+                normala=normalb=normalc=normald=None
                 
                 faceStyle="tri"
                 if oldpoints.c!=oldpoints.d:
@@ -239,53 +235,32 @@ def collectSubmeshData(meshBlock,exportData,workerthreat):
                     normalCounter+=1
                                    
                     isEdgeBreakA=isEdgeBreakB=isEdgeBreakC=isEdgeBreakD=isEdgeBreakD=isEdgeBreakA1=isEdgeBreakB1=isEdgeBreakC1=isEdgeBreakD1=0
-                    if str(faceStyle)=="tri":
-                        if edgebreaks!=None:
-                            isEdgeBreakA1=edgebreaks.IsSelected(4*faceIndex)
-                            isEdgeBreakB1=edgebreaks.IsSelected(4*faceIndex+1)
-                            isEdgeBreakC1=edgebreaks.IsSelected(4*faceIndex+3)
+                    if edgebreaks!=None:
+                        isEdgeBreakA1=edgebreaks.IsSelected(4*faceIndex)
+                        isEdgeBreakB1=edgebreaks.IsSelected(4*faceIndex+1)
+                        isEdgeBreakC1=edgebreaks.IsSelected(4*faceIndex+3)
+                          
+                        if isEdgeBreakA1==True and isEdgeBreakB1==True:
+                            isEdgeBreakA=1    
+                        if isEdgeBreakA1==True and isEdgeBreakB1==True:
+                            isEdgeBreakB=1
+                        if isEdgeBreakB1==True and isEdgeBreakC1==True:
+                            isEdgeBreakB=1    
+                        if isEdgeBreakB1==True and isEdgeBreakC1==True:
+                            isEdgeBreakC=1
                             
-                            if isEdgeBreakA1==True and isEdgeBreakB1==True:
-                                isEdgeBreakA=1
+                        if str(faceStyle)=="tri":
                             if isEdgeBreakA1==True and isEdgeBreakC1==True:
                                 isEdgeBreakA=1
-    
-                            if isEdgeBreakA1==True and isEdgeBreakB1==True:
-                                isEdgeBreakB=1
-                            if isEdgeBreakB1==True and isEdgeBreakC1==True:
-                                isEdgeBreakB=1
-    
                             if isEdgeBreakA1==True and isEdgeBreakC1==True:
-                                isEdgeBreakC=1
-                            if isEdgeBreakB1==True and isEdgeBreakC1==True:
                                 isEdgeBreakC=1
                                 
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.a],uva,meshBlock.saveSubMeshes[subcount],oldpoints.a,normala,normalf,phoneAngle,usePhongAngle,isEdgeBreakA)
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.b],uvb,meshBlock.saveSubMeshes[subcount],oldpoints.b,normalb,normalf,phoneAngle,usePhongAngle,isEdgeBreakB)
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.c],uvc,meshBlock.saveSubMeshes[subcount],oldpoints.c,normalc,normalf,phoneAngle,usePhongAngle,isEdgeBreakC)
-                
-                    if str(faceStyle)=="quad":
-                        if edgebreaks!=None:
-                            isEdgeBreakA1=edgebreaks.IsSelected(4*faceIndex)
-                            isEdgeBreakB1=edgebreaks.IsSelected(4*faceIndex+1)
-                            isEdgeBreakC1=edgebreaks.IsSelected(4*faceIndex+2)
-                            isEdgeBreakD1=edgebreaks.IsSelected(4*faceIndex+3)
-                            
-                            if isEdgeBreakA1==True and isEdgeBreakB1==True:
-                                isEdgeBreakA=1
+                        if str(faceStyle)=="quad":
+                            isEdgeBreakD1=edgebreaks.IsSelected(4*faceIndex+4)
                             if isEdgeBreakA1==True and isEdgeBreakD1==True:
                                 isEdgeBreakA=1
-    
-                            if isEdgeBreakA1==True and isEdgeBreakB1==True:
-                                isEdgeBreakB=1
-                            if isEdgeBreakB1==True and isEdgeBreakC1==True:
-                                isEdgeBreakB=1
-    
-                            if isEdgeBreakB1==True and isEdgeBreakC1==True:
-                                isEdgeBreakC=1
                             if isEdgeBreakD1==True and isEdgeBreakC1==True:
                                 isEdgeBreakC=1
-                                
                             if isEdgeBreakD1==True and isEdgeBreakA1==True:
                                 isEdgeBreakD=1
                             if isEdgeBreakD1==True and isEdgeBreakC1==True:
@@ -294,7 +269,8 @@ def collectSubmeshData(meshBlock,exportData,workerthreat):
                         buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.a],uva,meshBlock.saveSubMeshes[subcount],oldpoints.a,normala,normalf,phoneAngle,usePhongAngle,isEdgeBreakA)
                         buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.b],uvb,meshBlock.saveSubMeshes[subcount],oldpoints.b,normalb,normalf,phoneAngle,usePhongAngle,isEdgeBreakB)
                         buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.c],uvc,meshBlock.saveSubMeshes[subcount],oldpoints.c,normalc,normalf,phoneAngle,usePhongAngle,isEdgeBreakC)
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.d],uvd,meshBlock.saveSubMeshes[subcount],oldpoints.d,normald,normalf,phoneAngle,usePhongAngle,isEdgeBreakD)
+                        if str(faceStyle)=="quad":
+                            buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.d],uvd,meshBlock.saveSubMeshes[subcount],oldpoints.d,normald,normalf,phoneAngle,usePhongAngle,isEdgeBreakD)
                 
                 if usePhong==False:
                     buildPoint(faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.a],oldpoints.a,uva)
@@ -305,9 +281,9 @@ def collectSubmeshData(meshBlock,exportData,workerthreat):
                 subcount=len(meshBlock.saveSubMeshes)       
             subcount+=1
     exportData.subStatus=0
-#checks if a vert/uv - combination allready exists in the uniquePool or in the uniquePoolMorphed of the given Submesh.
-
-                
+    
+    
+# i think this function is not ok. 
 def transformUVS(subMesh):
     if subMesh.textureTag!=None:
         if len(subMesh.uvBuffer)>0:
@@ -359,12 +335,15 @@ def transformUVS(subMesh):
                             repYCounter+=1
                         if uv.y>repXCounter:
                             uv.y=1
-            #print "texuretag repeat = "+str(repeat)+" scaleU = "+str(scaleU)+" scaleV = "+str(scaleV)
-    
-# build all the geometryStreams (the geometry-streams contain the data still as python-list, and will be parsed into binary 
+        #print "texuretag repeat = "+str(repeat)+" scaleU = "+str(scaleU)+" scaleV = "+str(scaleV)    
+        #build all the geometryStreams (the geometry-streams contain the data still as python-list, and will be parsed into binary
+
+
+
+# create the final AWD-GeometryStream-Objects for one SubMeshBlock. 
 def buildGeometryStreams(subMesh,scale):
-        
-    # create the away3d-vertexBuffer-list from the c4d-point-list
+
+    # create the final AWD-GeometryStream-Object for Point-Data (type=1)
     if len(subMesh.vertexBuffer)>0:
         pointData=[]
         for point in subMesh.vertexBuffer:
@@ -373,7 +352,7 @@ def buildGeometryStreams(subMesh,scale):
             pointData.append(point.z*scale)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(1,pointData))
         
-    # create the away3d-vnormalBuffer-list from the c4d-Normal-list
+    # create the final AWD-GeometryStream-Object for Normal-Data (type=4)
     if len(subMesh.normalBuffer)>0:
         normalData=[]
         for point in subMesh.normalBuffer:
@@ -382,21 +361,21 @@ def buildGeometryStreams(subMesh,scale):
             normalData.append(point.z)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(4,normalData))
         
-    # create the away3d-quadBuffer-list from the c4d-quad-list
+    # create the final AWD-GeometryStream-Object for Quad-Index-Data (type=8) - NOT USED BY OFFICIAL AWD2
     if len(subMesh.quadBuffer)>0:
         quadData=[]
         for indexPoint in subMesh.quadBuffer:
             quadData.append(indexPoint)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(8,quadData))
         
-    # create the away3d-indexBuffer-list from the c4d-index-list
+    # create the final AWD-GeometryStream-Object for Index-Data (type=2)
     if len(subMesh.indexBuffer)>0:
         indexData=[]
         for indexPoint in subMesh.indexBuffer:
             indexData.append(indexPoint)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(2,indexData))
         
-    # create the away3d-uvBuffer-list from the c4d-uv-list
+    # create the final AWD-GeometryStream-Object for UV-Data (type=3)
     if len(subMesh.uvBuffer)>0:
         uvData=[]
         for uv in subMesh.uvBuffer:
@@ -404,91 +383,77 @@ def buildGeometryStreams(subMesh,scale):
             uvData.append(uv.y)
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(3,uvData))
         
-    # create the away3d-WeightBuffer and JointIndexBuffer-list from the c4d-Weights/jointIndex-list
+    # prepare Weight-Data and JointIndex-Data for the final AWD.GeometryStream-Object:
     if len(subMesh.weightsBuffer)>0 and len(subMesh.jointidxBuffer)>0:
-        maxJoints=0
-        subMesh.saveWeightsBuffer=[]
-        subMesh.saveIndexBuffer=[]
-        for weights in subMesh.weightsBuffer:
-            subMesh.saveWeightsBuffer.append([])# for each point create a empty list, that will store all weights for this point later
-            subMesh.saveIndexBuffer.append([])# for each point create a empty list, that will store all JointIndicies for this point later
-            if len(weights)>maxJoints:
-                maxJoints=len(weights)# find the maximum of used joints per converting
+        
+        # Get the Maximum number of Joints used on one point, and create some lists to store the new weight data:        
+        maxJoints=0                     # this will hold the maximum of joints per point, e.g. the length of weights-lists and jointIndex-lists
+        subMesh.saveWeightsBuffer=[]    # this will hold a new list of weight for each point of the submesh
+        subMesh.saveIndexBuffer=[]      # this will hold a new list of joindIndicies for each point of the submesh
+        for weights in subMesh.weightsBuffer:       # for each weightList (same as "for each point of submesh")
+            subMesh.saveWeightsBuffer.append([])        # create a new list, that will store all weights for this point later
+            subMesh.saveIndexBuffer.append([])          # create a new list, that will store all JointIndicies for this point later
+            if len(weights)>maxJoints:                  # if the length of this weight-list is bigger than a previous processed weight-list:
+                maxJoints=len(weights)                      # set maxJoints to the length of this weight-list
                 
-        jointCount=0
-        while jointCount<maxJoints:
+        jointCount=0                                
+        while jointCount<maxJoints:                         # do for 0-maxJoints
             bufferCount=0
-            while bufferCount<len(subMesh.weightsBuffer):
-                newWeight=0
+            while bufferCount<len(subMesh.weightsBuffer):       # do for every list of weights:
+                newWeight=float(0.0)
                 newIndex=1
-                biggestWeight=0
+                biggestWeight=float(0.0)
                 curweightcount=-1
                 weightcount=0
-                while weightcount<len(subMesh.weightsBuffer[bufferCount]):
-                    if subMesh.weightsBuffer[bufferCount][weightcount]>=biggestWeight:
-                        biggestWeight=subMesh.weightsBuffer[bufferCount][weightcount]
+                while weightcount<len(subMesh.weightsBuffer[bufferCount]):              # find the biggest weight of the old-weight-list
+                    if subMesh.weightsBuffer[bufferCount][weightcount]>=biggestWeight:      # and store it to biggestWeight and curweightcount (weight + jointIndex)
+                        biggestWeight=float(subMesh.weightsBuffer[bufferCount][weightcount])
                         curweightcount=weightcount
                     weightcount+=1
                     
-                if curweightcount>=0:
-                    newIndex=subMesh.jointidxBuffer[bufferCount][curweightcount]
-                    biggestWeight=biggestWeight
-                    subMesh.weightsBuffer[bufferCount].pop(curweightcount)
-                    subMesh.jointidxBuffer[bufferCount].pop(curweightcount)
+                if curweightcount>=0:                                                   # if the curweightcount was set (another weight/joint was found for this list)
+                    newIndex=subMesh.jointidxBuffer[bufferCount][curweightcount]            # get the "real" Index of the JointIndex
+                    subMesh.weightsBuffer[bufferCount].pop(curweightcount)                  # delete the newly found weight from the old weight-list
+                    subMesh.jointidxBuffer[bufferCount].pop(curweightcount)                 # delete the newly found joindindex from the old joindindex-list
                     
-                subMesh.saveIndexBuffer[bufferCount].append(newIndex)
-                subMesh.saveWeightsBuffer[bufferCount].append(biggestWeight)
+                subMesh.saveIndexBuffer[bufferCount].append(newIndex)                   # save the new JointIndex to the new JointIndex-list
+                subMesh.saveWeightsBuffer[bufferCount].append(biggestWeight)            # save the new JointIndex to the new JointIndex-list
                 bufferCount+=1
             jointCount+=1
-
+            
         bufferCount=0
-        while bufferCount<len(subMesh.weightsBuffer):
+        while bufferCount<len(subMesh.weightsBuffer):                           # for every weight-list do:
             jointCount=0
-            allWeight=0
-            while jointCount<maxJoints:
-                if subMesh.saveWeightsBuffer[bufferCount][jointCount]>1:
-                    subMesh.saveWeightsBuffer[bufferCount][jointCount]=1
-                if subMesh.saveWeightsBuffer[bufferCount][jointCount]<0:
-                    subMesh.saveWeightsBuffer[bufferCount][jointCount]=0
-                allWeight+=subMesh.saveWeightsBuffer[bufferCount][jointCount]
+            allWeight=0                 # here will store the sum of all weights applied to one point, so we can check if they are == 1.0 as they should
+            while jointCount<maxJoints:                                             # iterate trough list (using the maxJoints-value instead of len(weight-list)
+                if float(subMesh.saveWeightsBuffer[bufferCount][jointCount])>float(1.0):        # check if this weight alone is bigger than 1.0
+                    subMesh.saveWeightsBuffer[bufferCount][jointCount]=float(1.0)                    # and if so, set it back to 1
+                if float(subMesh.saveWeightsBuffer[bufferCount][jointCount])<float(0.0):        # check if this weight alone is smaller than 0.0
+                    subMesh.saveWeightsBuffer[bufferCount][jointCount]=float(0.0)                    # and if so, set it back to 0.0
+                allWeight+=float(subMesh.saveWeightsBuffer[bufferCount][jointCount])            # add this weight to allWeight        
                 jointCount+=1
                 
-            if allWeight == 0:
-                subMesh.saveWeightsBuffer[bufferCount][0]=1
-                allWeight=1
-            if allWeight != 1:
-                jointCount=0
-                while jointCount<maxJoints:
-                    subMesh.saveWeightsBuffer[bufferCount][jointCount]*=(1/allWeight)
+            if float(allWeight) == float(0.0):                                      # if the allWeight for this point is 0.0 
+                subMesh.saveWeightsBuffer[bufferCount][0]=float(1.0)                    # we set the first weight in the list to 1.0
+                allWeight=float(1.0)                                                    # and fix the allWeight to 1.0 so the next calculation will be skipped
+            if float(allWeight) != float(1.0):                                      # if the allWeight for this point is not 1.0
+                jointCount=0                                                                                
+                while jointCount<maxJoints:                                             # for every weight in the list do:                          
+                    subMesh.saveWeightsBuffer[bufferCount][jointCount]*=(1/allWeight)       # multiply with 1/allWeight to set the allWeight back to 1
                     jointCount+=1
-                
-
             bufferCount+=1
 
-        indexData=[]
-        printCnt=0
+        # build final AWD-GeometryStream-Object for JointIndicies (type=6)
+        indexData=[]                                # will hold the final weight-list
         for index in subMesh.saveIndexBuffer:
-            #print str(printCnt)+"  =  "+str(index)
-            printCnt+=1
             for index2 in index:
-                if str(index2)==str(1):
-                    pass#print "bound to nulldata"
                 indexData.append(index2)            
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(6,indexData))
 
+        # build final AWD-GeometryStream-Object for Weights (type=7)
         weightData=[]
-        printCnt=0
         for weight in subMesh.saveWeightsBuffer:
-            #print str(printCnt)+"  =  "+str(weight)
-            printCnt+=1
             for weight2 in weight:
-                weightData.append(weight2)
-            
+                weightData.append(weight2)            
         subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(7,weightData))
-
-        #subMesh.saveGeometryStreams.append(classesAWDBlocks.awdGeometryStream(3,uvData))
-       
-  
-    
-     
     
