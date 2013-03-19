@@ -1,4 +1,4 @@
-# the main Scene containing all the data and parameters needed for exporting
+# the main Scene containing all the data and parameters needed for export
 # One Instance of this class is create at the beginning of the export process in the "mainExporter.py" 
 # this instance is stored in the variable "exportData" and gets modified withhin the export-process
 

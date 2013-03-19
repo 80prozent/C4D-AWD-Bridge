@@ -252,16 +252,16 @@ class MainDialog(c4d.gui.GeDialog):
            
         if id == ids.MENU_ABOUT_ABOUT: 
 
-            dlg = AboutDialog()
+            pass#dlg = AboutDialog()
             #DLG_TYPE_MODAL = > synchronous dialog
             #DLG_TYPE_ASYNC = > asynchronous dialogs
-            dlg.Open(dlgtype=c4d.DLG_TYPE_MODAL, defaultw=300, defaulth=300)
+            #dlg.Open(dlgtype=c4d.DLG_TYPE_MODAL, defaultw=300, defaulth=300)
             
         if id == ids.MENU_ABOUT_HELP: 
-            dlg = HelpDialog()
+            pass#dlg = HelpDialog()
             #DLG_TYPE_MODAL = > synchronous dialog
             #DLG_TYPE_ASYNC = > asynchronous dialogs
-            dlg.Open(dlgtype=c4d.DLG_TYPE_ASYNC, defaultw=400, defaulth=400)
+            #dlg.Open(dlgtype=c4d.DLG_TYPE_ASYNC, defaultw=400, defaulth=400)
                  
         return True  
     
