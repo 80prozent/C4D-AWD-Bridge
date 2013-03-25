@@ -111,14 +111,14 @@ def buildPoint(exportData,faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointN
         #morphCounter+=1
     weights=None
     joints=None
-    if meshBlock.weightTag is not None:#if the mesh is skinned:
+    if meshBlock.weightTag is not None:#if the mesh is skinned to one valid skeleton, we collect the weights and JointIndicies used by this point:
         jointcounter=0
         weights=[]  
         joints=[] 
-        jointCount=weightTag.GetJointCount()
+        jointCount=meshBlock.weightTag.GetJointCount()
         while jointcounter<jointCount:   
-            newWeight=weightTag.GetWeight(jointcounter,pointNr)
-            newJoint=weightTag.GetJoint(jointcounter)
+            newWeight=meshBlock.weightTag.GetWeight(jointcounter,pointNr)
+            newJoint=meshBlock.weightTag.GetJoint(jointcounter)
             if newWeight>0 and newJoint is not None:
                 newIndex=exportData.jointIDstoJointBlocks[str(newJoint.GetName())].jointID-1
                 if newIndex>=0:
