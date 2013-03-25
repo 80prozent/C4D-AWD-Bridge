@@ -75,19 +75,30 @@ def buildSkeletonAnimation(exportData,curObj,mainDialog):
         buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)                                          # create a SkeletonAnimationBlock containing only one Frame
         return                                                                                                      # exit this function
     curve=track.GetCurve()                                                                                      # get the curve for this track
+    frameCounter=minFrame
     keyCounter=0   
     keyCount=curve.GetKeyCount()                                                                                # get key-Count of the Curve
     while keyCounter<keyCount:                                                                                  # iterate over the keyCount
-        key=curve.GetKey(keyCounter)                                                                                # get a key
+        key=curve.GetKey(keyCounter)                                                                            # get a key   
+        keyTime=key.GetTime()    
+        #exportData.doc.SetTime(curTime)                                                                   # get a key   
+        keyTimeInFrame=keyTime.GetFrame(exportData.doc.GetFps())
+        while frameCounter<(keyTimeInFrame-1):
+            c4d.documents.SetDocumentTime(exportData.doc, c4d.BaseTime(frameCounter*((1000/exportData.doc.GetFps())/1000)))# set new Time
+            c4d.DrawViews( c4d.DRAWFLAGS_FORCEFULLREDRAW|c4d.DRAWFLAGS_NO_THREAD|c4d.DRAWFLAGS_NO_REDUCTION|c4d.DRAWFLAGS_STATICBREAK )
+            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
+            c4d.EventAdd(c4d.EVENT_ANIMATE)
+            frameCounter+=1
+            
         exportData.allStatus+=float(10/float(curve.GetKeyCount()))                                                  # used to calculate processbar
         mainHelpers.updateCanvas(mainDialog,exportData)                                                             # update processbar
         # if the keys time is within the range to export:
-        if key.GetTime().GetFrame(exportData.doc.GetFps())>=minFrame and key.GetTime().GetFrame(exportData.doc.GetFps())<=maxFrame:
-            if (keyCounter+1)<curve.GetKeyCount():# if this is not the last key, we calculate the duration-time like this: durationTime = nextKeyTime - thisKeyTime
-                durationList.append(float(curve.GetKey(keyCounter+1).GetTime().Get())-float(key.GetTime().Get()))
-            if (keyCounter+1)>=curve.GetKeyCount():# if this is the last keyframe within the range, we manually set its duration
-                durationList.append(1*exportData.doc.GetFps())
-            idList.append(buildSkeletonPose(exportData,curObj,key.GetTime()))# create the new poseBlock for this frame
+        if float(keyTimeInFrame)>=float(minFrame) and float(keyTimeInFrame)<=float(maxFrame):
+            if (keyCounter+1)<keyCount:# if this is not the last key, we calculate the duration-time like this: durationTime = nextKeyTime - thisKeyTime
+                durationList.append(float(curve.GetKey(keyCounter+1).GetTime().Get())-float(keyTime.Get()))
+            if (keyCounter+1)>=keyCount:# if this is the last keyframe within the range, we set its duration 
+                durationList.append(float(maxFrame)-keyTime.Get())#100*(1000/exportData.doc.GetFps()))
+            idList.append(buildSkeletonPose(exportData,curObj,keyTime))# create the new poseBlock for this frame
         keyCounter+=1
     buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)                                          # create the SkeletonAnimationBlock 
 
@@ -115,17 +126,20 @@ def buildSkeletonPose(exportData,curObj,curTime):
     c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
     c4d.EventAdd(c4d.EVENT_ANIMATE)
     newAWDBlock.transformations=[]
-    buildJointTransform([curObj],newAWDBlock.transformations,exportData) # recursive function to get all Joints as JointBlocks
+    buildJointTransform([curObj],newAWDBlock.transformations,exportData,True) # recursive function to get all Joints as JointBlocks
     return newAWDBlock.blockID
     
 # saves the skeleton-joint-matricies while playing trough timeline - called by "buildSkeletonPose()"
-def buildJointTransform(curObjList,jointTransforms,exportData):   
+def buildJointTransform(curObjList,jointTransforms,exportData,firstJoint):   
     for curObj in curObjList:
-        newMatrix=curObj.GetMl()
+        if firstJoint==False:
+            newMatrix=curObj.GetMl()    
+        if firstJoint==True:
+            newMatrix=curObj.GetMg()
         newMatrix.off=newMatrix.off*exportData.scale
         jointTransforms.append(newMatrix)
         if len(curObj.GetChildren())>0:
-            buildJointTransform(curObj.GetChildren(),jointTransforms,exportData)
+            buildJointTransform(curObj.GetChildren(),jointTransforms,exportData,False)
             
     
 

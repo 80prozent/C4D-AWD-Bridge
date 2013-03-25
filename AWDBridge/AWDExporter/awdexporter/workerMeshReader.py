@@ -70,6 +70,7 @@ def convertMesh(meshBlock,exportData,workerthreat):
             print "Warning - Not all Joints are bound to the same Skeleton"
         if len(allSkeletons)==1:
             meshBlock.weightTag=weightTag
+            
     if workerthreat.TestBreak():
         return
         
