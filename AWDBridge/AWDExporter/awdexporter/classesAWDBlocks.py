@@ -80,6 +80,7 @@ class TriangleGeometrieBlock(BaseBlock):
         #self.copiedMesh = None
         self.pointsUsed = []
         self.pointsUsed = []
+        self.weightTag=None
 
         self.saveLookUpName = "testName"
         self.saveGeometryProps = []

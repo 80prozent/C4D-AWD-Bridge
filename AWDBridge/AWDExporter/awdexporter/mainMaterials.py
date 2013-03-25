@@ -96,19 +96,46 @@ def createSingleTextureBlock(exportData,texturePath):
                 except IOError as e:
                     exportData.AWDerrorObjects.append(classesHelper.AWDerrorObject(ids.ERRORMESSAGE4,inDocumentPath))
                     return
-        texturefile=open(str(inDocumentPath),"rb")
-        if exportData.embedTextures==0:
-            newAWDBlock.saveTextureData=texturefile.read()
-        
-        texturefile.close()
+        curBmp = c4d.bitmaps.BaseBitmap()
+        result, ismovie = curBmp.InitWith(str(inDocumentPath))
+        if result==c4d.IMAGERESULT_OK: #int check
+            # picture loaded
+            if ismovie==True: #bool check
+                print "Texture is Movie...There is no movie suupport in AWD..."
+            else:
+                validWidth, validHeight=checkTextureForPowerOfTwo(curBmp)  #pass # file is a movie
+                if validWidth!=True and validHeight!=True:
+                    exportData.AWDerrorObjects.append(classesHelper.AWDerrorObject(ids.ERRORMESSAGE4,inDocumentPath))
+                    return
+                if validWidth!=True:
+                    exportData.AWDerrorObjects.append(classesHelper.AWDerrorObject(ids.ERRORMESSAGE4,inDocumentPath))
+                    return
+                if validHeight!=True:
+                    exportData.AWDerrorObjects.append(classesHelper.AWDerrorObject(ids.ERRORMESSAGE4,inDocumentPath))
+                    return
+                if exportData.embedTextures==0:                     # if the texture should be embed in the awd file:
+                    texturefile=open(str(inDocumentPath),"rb")          # if the function has not returned yet, the 'inDocumentPath' points to a valid file, so we open this file
+                    newAWDBlock.saveTextureData=texturefile.read()      # we just read all the bits of the file into a the bytestring 'saveTextureData'    
+                    texturefile.close()
 
-
-
-
+# checks if width and height of a texture is in 'power of two'
+# returns two boolean values (width/height)
+def checkTextureForPowerOfTwo(curBmp):
+    w, h = curBmp.GetSize()
+    returnerW = True
+    returnerH = True
+    if int(w)!=int(2) and int(w)!=int(4) and int(w)!=int(8) and int(w)!=int(16) and int(w)!=int(32) and int(w)!=int(64) and int(w)!=int(128) and int(w)!=int(256) and int(w)!=int(512) and int(w)!=int(1024) and int(w)!=int(2048):
+        returnerW=False
+    if int(h)!=int(2) and int(h)!=int(4) and int(h)!=int(8) and int(h)!=int(16) and int(h)!=int(32) and int(h)!=int(64) and int(h)!=int(128) and int(h)!=int(256) and int(h)!=int(512) and int(h)!=int(1024) and int(h)!=int(2048):
+        returnerH=False
+    return returnerW, returnerH
+    
+    
+# recursive function to check which materials are used in the scene...
 def checkObjForUsedMaterials(exportData,curObj,usedMatsDic,fromChild=False):
     exporterSettingsTag=curObj.GetTag(1028905)
     useMats=True
-    if exporterSettingsTag!=None:
+    if exporterSettingsTag is not None:
         if exporterSettingsTag[1016]==False and exporterSettingsTag[1016]== True:
             return
         if exporterSettingsTag[1016]==False and exporterSettingsTag[1016]== False:

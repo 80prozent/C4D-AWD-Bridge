@@ -16,6 +16,29 @@ def convertMeshes(meshBlockList,exportData,workerthreat):
             return                                              # and return if he has   
         convertMesh(meshBlock,exportData,workerthreat)      # convert the geometry-block into away3d-mesh-data
 
+# collect all Skeletons that are used by a weighttag in a list
+def getUsedSkeletons(cntLength,weightTag,jointIdsToSkeletonsBlocks,curDoc):
+    jointCnt=0
+    usedSkeletons=[]
+    while jointCnt<cntLength:
+        curJoint=weightTag.GetJoint(jointCnt,curDoc)
+        if curJoint is not None:
+            curJointName=curJoint.GetName()
+            nextSkeleton=jointIdsToSkeletonsBlocks.get(str(curJointName),None) 
+            if nextSkeleton is not None:
+                if len(usedSkeletons)==0:
+                    usedSkeletons.append(nextSkeleton)
+                if len(usedSkeletons)>0:
+                    allreadyExists=False
+                    for skeleton in usedSkeletons:
+                        if skeleton==nextSkeleton:
+                            allreadyExists=True
+                            break
+                    if allreadyExists==False:
+                        usedSkeletons.append(nextSkeleton)
+        jointCnt+=1
+    return usedSkeletons
+    
 def convertMesh(meshBlock,exportData,workerthreat):
     exportData.doc.SetActiveObject(meshBlock.copiedMesh)
     if not meshBlock.copiedMesh.GetTag(5604): 
@@ -36,36 +59,17 @@ def convertMesh(meshBlock,exportData,workerthreat):
     if workerthreat.TestBreak():
         return
 
-    # if the meshBlock has a WeightTag-applied, we create a "jointTranslater"-list, so when parsing the weight-data later, we know which joint-indicies to set.
-    if meshBlock.copiedMesh.GetTag(c4d.Tweights)!=None:
-        firstSkeleton=exportData.jointIDstoSkeletonBlocks.get(str(meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJoint(0,exportData.doc).GetName()),None)        
-        noValidSkeleton=False
-        if firstSkeleton!=None:
-            firstSkeletonName=exportData.jointIDstoSkeletonBlocks[str(meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJoint(0,exportData.doc).GetName())].name
-            jointcounter=0 
-            meshBlock.jointTranslater=[]
-            while jointcounter<meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJointCount():
-                curJoint=meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJoint(jointcounter,exportData.doc)
-                newJointIndex=-10
-                if curJoint is not None:
-                    if exportData.jointIDstoSkeletonBlocks.get(str(curJoint.GetName()),None) is None:
-                        noValidSkeleton=True
-                        break
-                    if exportData.jointIDstoSkeletonBlocks.get(str(curJoint.GetName()),None) is not None:
-                        if firstSkeletonName!=exportData.jointIDstoSkeletonBlocks[str(curJoint.GetName())].name:
-                            noValidSkeleton=True
-                            break
-                    newJointIndex=exportData.jointIDstoJointBlocks[str(curJoint.GetName())].jointID-1
-                meshBlock.jointTranslater.append(newJointIndex)
-                jointcounter+=1
-            if noValidSkeleton==False:
-                pass#print "Skeleton Found: "+str(firstSkeletonName)
-        if firstSkeleton==None or noValidSkeleton==True:
-            jointcounter=0
-            meshBlock.jointTranslater=[]
-            while jointcounter<meshBlock.copiedMesh.GetTag(c4d.Tweights).GetJointCount():
-                meshBlock.jointTranslater.append(jointcounter)
-                jointcounter+=1
+    # if the meshBlock has a WeightTag-applied, we check if the mesh is used by one single skeleton or not.
+    weightTag=meshBlock.copiedMesh.GetTag(c4d.Tweights)
+    if weightTag is not None:
+        jointCount=weightTag.GetJointCount()
+        allSkeletons=getUsedSkeletons(jointCount,weightTag,exportData.jointIDstoSkeletonBlocks,exportData.doc)           
+        if len(allSkeletons)==0:
+            print "Warning - No Joints are bound to a valid Skeleton"
+        if len(allSkeletons)>1:
+            print "Warning - Not all Joints are bound to the same Skeleton"
+        if len(allSkeletons)==1:
+            meshBlock.weightTag=weightTag
     if workerthreat.TestBreak():
         return
         
@@ -80,7 +84,7 @@ def convertMesh(meshBlock,exportData,workerthreat):
             #submorphActiv=False
             #submorphdata=[submorphVerts,submorphUVs,submorphActiv,morphState.morphName,morphState.tagName,morphState.tagObject]
             #submesh.morphs.append(submorphdata)                
-                
+    print ("parse = "+str(meshBlock.sceneObject.GetName()))            
     workerSubMeshReader.collectSubmeshData(meshBlock,exportData,workerthreat)   # parse this object into a awd2-geometry-block
     if workerthreat.TestBreak():                                                # when the user has cancelled the process: 
         return                                                                      # we stop executing and return 

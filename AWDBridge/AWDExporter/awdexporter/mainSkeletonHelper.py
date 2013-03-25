@@ -53,7 +53,7 @@ class SkeletonHelper(object):
                 messageStr="ERROR: Some Joints have Scale-Values other than '1,1,1' !!!\n\n"
         skinnedMatrices=self.checkBind() 
         rvalue1=False             
-        if len(skinnedMatrices)>1:
+        if len(skinnedMatrices)>=1:
             rvalue1 = gui.QuestionDialog("Joints are bound to a 'Skinning-Matrix' thats not the Global Matrix of the C4D-Scene.\nTo prevent errors all meshes should be skinned to the GLobal-C4D-Matrix.\nFix automaticcaly ?")            
             if rvalue1==True:
                 self.setSkinMgToGlobal()  

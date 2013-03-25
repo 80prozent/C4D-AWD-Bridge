@@ -32,7 +32,7 @@ def prepareSubmeshIndexe(meshBlock):
     return   
            
 #checks if a vert/uv - combination allready exists in the uniquePool or in the uniquePoolMorphed of the given Submesh.
-def buildSharedPoint(faceStyle,meshBlock,curMesh,curPoint,curUV,curSubMesh,pointNr,normal,normalf,anglelimit,useAngle,isEdgeBreak):
+def buildSharedPoint(exportData,faceStyle,meshBlock,curMesh,curPoint,curUV,curSubMesh,pointNr,normal,normalf,anglelimit,useAngle,isEdgeBreak):
                     
         
     checkerstring=str(curPoint)
@@ -91,10 +91,10 @@ def buildSharedPoint(faceStyle,meshBlock,curMesh,curPoint,curUV,curSubMesh,point
                 
     if pointIndex==-1 and pointMorphedIndex==-1:
         meshBlock.pointsUsed[pointNr]=True   
-        buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUV,normal,normalf,checkerstring2)
+        buildPoint(exportData,faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUV,normal,normalf,checkerstring2)
 
                          
-def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,curNormal=None,curNormalf=None,checkerstring=None):
+def buildPoint(exportData,faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,curNormal=None,curNormalf=None,checkerstring=None):
                      
     ismorph=False
     #morphCounter=0
@@ -111,15 +111,16 @@ def buildPoint(faceStyle,meshBlock,curMesh,curSubMesh,curPoint,pointNr,curUv,cur
         #morphCounter+=1
     weights=None
     joints=None
-    if curMesh.GetTag(c4d.Tweights):#if the mesh is skinned:
+    if meshBlock.weightTag is not None:#if the mesh is skinned:
         jointcounter=0
         weights=[]  
         joints=[] 
-        jointCount=curMesh.GetTag(c4d.Tweights).GetJointCount()
+        jointCount=weightTag.GetJointCount()
         while jointcounter<jointCount:   
-            newWeight=curMesh.GetTag(c4d.Tweights).GetWeight(jointcounter,pointNr)
-            if newWeight>0:
-                newIndex=meshBlock.jointTranslater[jointcounter]
+            newWeight=weightTag.GetWeight(jointcounter,pointNr)
+            newJoint=weightTag.GetJoint(jointcounter)
+            if newWeight>0 and newJoint is not None:
+                newIndex=exportData.jointIDstoJointBlocks[str(newJoint.GetName())].jointID-1
                 if newIndex>=0:
                     weights.append(newWeight)
                     joints.append(newIndex) 
@@ -266,18 +267,18 @@ def collectSubmeshData(meshBlock,exportData,workerthreat):
                             if isEdgeBreakD1==True and isEdgeBreakC1==True:
                                 isEdgeBreakD=1
                                 
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.a],uva,meshBlock.saveSubMeshes[subcount],oldpoints.a,normala,normalf,phoneAngle,usePhongAngle,isEdgeBreakA)
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.b],uvb,meshBlock.saveSubMeshes[subcount],oldpoints.b,normalb,normalf,phoneAngle,usePhongAngle,isEdgeBreakB)
-                        buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.c],uvc,meshBlock.saveSubMeshes[subcount],oldpoints.c,normalc,normalf,phoneAngle,usePhongAngle,isEdgeBreakC)
+                        buildSharedPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.a],uva,meshBlock.saveSubMeshes[subcount],oldpoints.a,normala,normalf,phoneAngle,usePhongAngle,isEdgeBreakA)
+                        buildSharedPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.b],uvb,meshBlock.saveSubMeshes[subcount],oldpoints.b,normalb,normalf,phoneAngle,usePhongAngle,isEdgeBreakB)
+                        buildSharedPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.c],uvc,meshBlock.saveSubMeshes[subcount],oldpoints.c,normalc,normalf,phoneAngle,usePhongAngle,isEdgeBreakC)
                         if str(faceStyle)=="quad":
-                            buildSharedPoint(faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.d],uvd,meshBlock.saveSubMeshes[subcount],oldpoints.d,normald,normalf,phoneAngle,usePhongAngle,isEdgeBreakD)
+                            buildSharedPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,allOldPoints[oldpoints.d],uvd,meshBlock.saveSubMeshes[subcount],oldpoints.d,normald,normalf,phoneAngle,usePhongAngle,isEdgeBreakD)
                 
                 if usePhong==False:
-                    buildPoint(faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.a],oldpoints.a,uva)
-                    buildPoint(faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.b],oldpoints.b,uvb)
-                    buildPoint(faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.c],oldpoints.c,uvc)
+                    buildPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.a],oldpoints.a,uva)
+                    buildPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.b],oldpoints.b,uvb)
+                    buildPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.c],oldpoints.c,uvc)
                     if str(faceStyle)=="quad":
-                        buildPoint(faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.d],oldpoints.d,uvd)
+                        buildPoint(exportData,faceStyle,meshBlock,meshBlock.copiedMesh,meshBlock.saveSubMeshes[subcount],allOldPoints[oldpoints.d],oldpoints.d,uvd)
                 subcount=len(meshBlock.saveSubMeshes)       
             subcount+=1
     exportData.subStatus=0

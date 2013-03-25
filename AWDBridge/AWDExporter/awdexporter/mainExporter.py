@@ -122,18 +122,18 @@ def export(exportData):
     c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
     c4d.EventAdd(c4d.EVENT_ANIMATE)          
             
-    objectsToExport=exportData.doc.GetObjects()
-    if len(objectsToExport)==0:
-        if exportData.unusedMats==False:
-            newError=classesHelper.AWDerrorObject(ids.ERRORMESSAGE2,None)
-            exportData.AWDerrorObjects.append(newError)
-            return exportData
-        if exportData.unusedMats==True:
-            exportData.allc4dMaterials=doc.GetMaterials()
-            if len(exportData.allc4dMaterials)==0:
-                newError=classesHelper.AWDerrorObject(ids.ERRORMESSAGE2,None)
-                exportData.AWDerrorObjects.append(newError)
-                return exportData
+    objectsToExport=exportData.doc.GetObjects()                             # get a list of all objects in the scene
+    if len(objectsToExport)==0:                                             # if no object is in the scene:
+        if exportData.unusedMats==False:                                        # if no unsued materials should be exported:
+            newError=classesHelper.AWDerrorObject(ids.ERRORMESSAGE2,None)           # create a new errorObject
+            exportData.AWDerrorObjects.append(newError)                             # append the new errorObject to the errorlist, so it will be displayed at the end of export process 
+            return exportData                                                       # return from function
+        if exportData.unusedMats==True:                                         # if unused materials should be exported:
+            exportData.allc4dMaterials=doc.GetMaterials()                           # get a list of all materials
+            if len(exportData.allc4dMaterials)==0:                                  # if no material was found:
+                newError=classesHelper.AWDerrorObject(ids.ERRORMESSAGE2,None)           # create a new errorObject
+                exportData.AWDerrorObjects.append(newError)                             # append the new errorObject to the errorlist, so it will be displayed at the end of export process 
+                return exportData                                                       # return from function
 
     originalTime=exportData.doc.GetTime()#store the original play position
     storeEditMode=exportData.doc.GetMode()#store the current EditMode
