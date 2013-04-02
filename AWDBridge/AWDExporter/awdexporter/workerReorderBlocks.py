@@ -31,6 +31,31 @@ def addSkeletonAnimation(exportData,awdSkeletonAnimation):
         awdSkeletonAnimation.saveBlockID=len(exportData.allSaveAWDBlocks)
         exportData.allSaveAWDBlocks.append(awdSkeletonAnimation)
 
+def addToExportListMaterials(exportData,awdBlock):
+    if awdBlock.isReordered==True:
+        return awdBlock.saveBlockID
+    if awdBlock.isReordered==False:
+        if awdBlock.tagForExport==True:
+            doThis=False
+            if awdBlock.blockType==82:#NameSpace
+                doThis=True
+            if awdBlock.blockType==254:#NameSpace
+                doThis=True
+            if awdBlock.blockType==255:#metadata
+                doThis=True
+            if awdBlock.blockType==81:#material
+                doThis=True
+                if awdBlock.saveMatType==2:
+                    textureBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.saveColorTextureID),None)
+                    if textureBlock is not None:
+                        awdBlock.saveColorTextureID=addToExportList(exportData,textureBlock)
+            if doThis==True:
+                awdBlock.saveBlockID=int(len(exportData.allSaveAWDBlocks))
+                awdBlock.isReordered=True
+                exportData.allSaveAWDBlocks.append(awdBlock)
+                return awdBlock.saveBlockID
+    return None
+                        
 def addToExportList(exportData,awdBlock):
     if awdBlock.isReordered==True:
         return awdBlock.saveBlockID
@@ -44,42 +69,35 @@ def addToExportList(exportData,awdBlock):
                 pass#scene
             if awdBlock.blockType==22:#container
                 parentBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.dataParentBlockID),None)
-                if parentBlock!=None:
+                if parentBlock is not None:
                     awdBlock.dataParentBlockID=addToExportList(exportData,parentBlock)
+                    
             if awdBlock.blockType==23:#meshinstance
                 parentBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.dataParentBlockID),None)
-                if parentBlock!=None:
+                if parentBlock is not None:
                     awdBlock.dataParentBlockID=addToExportList(exportData,parentBlock)
                 geoBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.geoBlockID),None)
-                if geoBlock!=None:
-                    awdBlock.geoBlockID=addToExportList(exportData,geoBlock)                    
-                if len(geoBlock.saveSubMeshes)<len(awdBlock.saveMaterials):
-                    awdBlock.saveMaterials.pop(0)
+                if geoBlock is not None:
+                    awdBlock.geoBlockID=addToExportList(exportData,geoBlock)           
                 awdBlock.saveMaterials2=[]
+                #print str(len(geoBlock.saveSubMeshes))+"   geoBlock.saveSubMeshes"
                 for mat in awdBlock.saveMaterials:
-                    matBlockID=int(exportData.allMaterialsBlockIDS[int(mat)])
-                    if int(matBlockID)<0:
-                        matBlockID=int(exportData.allMaterialsBlockIDS[0])
-                    matBlock=exportData.allAWDBlocks[int(matBlockID)]
-                    awdBlock.saveMaterials2.append(matBlock.saveBlockID)
-                while len(awdBlock.saveMaterials2)<len(geoBlock.saveSubMeshes):
-                    matBlockID=int(exportData.allMaterialsBlockIDS[0])
-                    matBlock=exportData.allAWDBlocks[int(matBlockID)]
-                    awdBlock.saveMaterials2.append(matBlock.saveBlockID)
-                        
+                    #print "mat = "+str(int(mat))+"  /  "+str(exportData.allAWDBlocks[int(mat)])
+                    matBlockID=addToExportListMaterials(exportData,exportData.allAWDBlocks[int(mat)])
+                    #print "matBlockID = "+str(matBlockID)
+                    awdBlock.saveMaterials2.append(matBlockID)
+                    #print "awdBlock.saveMaterials2 = "+str(awdBlock.saveMaterials2)
+                      
             if awdBlock.blockType==41:#light
                 parentBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.dataParentBlockID),None)
-                if parentBlock!=None:
+                if parentBlock is not None:
                     awdBlock.dataParentBlockID=addToExportList(exportData,parentBlock)
+                    
             if awdBlock.blockType==42:#camera
                 parentBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.dataParentBlockID),None)
-                if parentBlock!=None:
+                if parentBlock is not None:
                     awdBlock.dataParentBlockID=addToExportList(exportData,parentBlock)
-            if awdBlock.blockType==81:#material
-                if awdBlock.saveMatType==2:
-                    textureBlock=exportData.IDsToAWDBlocksDic.get(str(awdBlock.saveColorTextureID),None)
-                    if textureBlock!=None:
-                        awdBlock.saveColorTextureID=addToExportList(exportData,textureBlock)
+                    
                             
             if awdBlock.blockType==82:#texture
                 pass
@@ -93,10 +111,7 @@ def addToExportList(exportData,awdBlock):
                 return 0
             if awdBlock.blockType==121:#uvanimation
                 pass
-            if awdBlock.blockType==254:#NameSpace
-                pass
-            if awdBlock.blockType==255:#metadata
-                pass
+                
             awdBlock.saveBlockID=int(len(exportData.allSaveAWDBlocks))
             awdBlock.isReordered=True
             exportData.allSaveAWDBlocks.append(awdBlock)

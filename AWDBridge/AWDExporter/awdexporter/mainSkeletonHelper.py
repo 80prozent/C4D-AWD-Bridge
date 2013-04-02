@@ -63,7 +63,7 @@ class SkeletonHelper(object):
                     messageStr=""
                 messageStr+="ERROR: Joints are bound to a 'Skinning-Matrix', thats not the Global Matrix of the C4D-Scene.\nTo prevent Errors all Objects should be skinned to the GLobal-C4D-Matrix.\n\n"  
          
-        print ("Skeleton Status\n"+str(messageStr))
+        #print ("Skeleton Status\n"+str(messageStr))
         if printErrors==True:
             gui.MessageDialog("Skeleton Status\n"+str(messageStr))
             for tag in self.expressionTagsToRestore:
@@ -162,10 +162,10 @@ class SkeletonHelper(object):
             
     def hasWeight(self,jointList,weightTag):
         for curObj in  jointList:
-            if weightTag.FindJoint(curObj) is not None:
+            if weightTag.FindJoint(curObj) is not None and weightTag.FindJoint(curObj)>=0 :
                 return True
             if curObj.GetChildren():
-                if self.hasWeight(curObj.GetChildren(),tag)==True:
+                if self.hasWeight(curObj.GetChildren(),weightTag)==True:
                     return True
         return False
         
@@ -195,7 +195,7 @@ class SkeletonHelper(object):
             scaleStandart=c4d.Vector(1,1,1)
             scaleVec=curObj.GetAbsScale()
             if str(scaleStandart)!=str(scaleVec):
-                print curObj.GetName()+" / "+str(scaleStandart)+" / "+str(scaleVec)
+                #print curObj.GetName()+" / "+str(scaleStandart)+" / "+str(scaleVec)
                 return False
             if curObj.GetChildren():
                 if self.isRightScale(curObj.GetChildren())==False:

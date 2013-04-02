@@ -12,10 +12,10 @@ def createAllSceneBlocks(exportData,objList,parentExportSettings=None,tagForExpo
         thisExporterSettings=parentExportSettings
         exportThisObj=True
         returnerAR=[False,False]
-        if exporterSettingsTag==None:
+        if exporterSettingsTag is None:
             returnerAR=createSceneBlock(exportData,object,tagForExport,returner,False)
             
-        if exporterSettingsTag!=None:
+        if exporterSettingsTag is not None:
             if exporterSettingsTag[1014]==False and exporterSettingsTag[1016]== True:
                 pass
             if exporterSettingsTag[1014]==True and exporterSettingsTag[1016]== True:
@@ -72,16 +72,19 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
                 exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
                 exportData.allAWDBlocks.append(newAWDBlock)
                 exportData.allSceneObjects.append(newAWDBlock)
+                if curObj[c4d.INSTANCEOBJECT_RENDERINSTANCE]==True:
+                    newAWDBlock.isRenderInstance=True                
                 newAWDBlock.name=curObj.GetName()
                 newAWDBlock.tagForExport=tagForExport
                 curObj.SetName(str(exportData.idCounter))
                 exportData.idCounter+=1
     
                 newAWDBlock.dataParentBlockID=0
-                if curObj.GetUp():
-                    parentID=exportData.IDsToAWDBlocksDic.get(str(curObj.GetUp().GetName()),None)
+                parentObj=curObj.GetUp()
+                if parentObj is not None:
+                    parentID=exportData.IDsToAWDBlocksDic.get(str(parentObj.GetName()),None)
                     if parentID!=None:
-                        newAWDBlock.dataParentBlockID=int(curObj.GetUp().GetName())
+                        newAWDBlock.dataParentBlockID=int(parentObj.GetName())
                 exportData.unconnectedInstances.append(newAWDBlock)
                 return True, True
             
@@ -89,15 +92,16 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
     
         if curObj.GetType() == c4d.Opolygon:
         
-            newAWDBlock=classesAWDBlocks.TriangleGeometrieBlock(exportData.idCounter,0,curObj)
-            exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
-            exportData.allAWDBlocks.append(newAWDBlock) 
-            exportData.allMeshObjects.append(newAWDBlock)
-            newAWDBlock.saveLookUpName=curObj.GetName()
-            newAWDBlock.tagForExport=tagForExport
+            newAWDBlockGEO=classesAWDBlocks.TriangleGeometrieBlock(exportData.idCounter,0,curObj)
+            exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlockGEO
+            exportData.allAWDBlocks.append(newAWDBlockGEO) 
+            exportData.allMeshObjects.append(newAWDBlockGEO)
+            newAWDBlockGEO.saveLookUpName=curObj.GetName()
+            newAWDBlockGEO.tagForExport=tagForExport
             exportData.idCounter+=1
     
             newAWDBlock=classesAWDBlocks.MeshInstanceBlock(exportData.idCounter,0,exportData.idCounter-1,curObj)
+            newAWDBlockGEO.sceneBlocks.append(newAWDBlock)
             exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
             exportData.allAWDBlocks.append(newAWDBlock)
             exportData.allSceneObjects.append(newAWDBlock)
@@ -114,9 +118,9 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
                 
                     
             exportData.idCounter+=1
-            materials=mainMaterials.getObjectsMaterials(curObj,None,newAWDBlock)
-            for mat in materials:
-                newAWDBlock.saveMaterials.append(mat[0])
+            #materials=mainMaterials.getObjectsMaterials(curObj,None,newAWDBlock)
+            #for mat in materials:
+                #newAWDBlock.saveMaterials.append(mat[0])
     
         
             return True, True
@@ -145,8 +149,27 @@ def createSceneBlock(exportData,curObj,tagForExport,returner=True,onlyNullObject
     
     
         if curObj.GetType() == c4d.Olight:
-            if len(curObj.GetChildren())==0:
-                return False, False
+            lightType=None
+            if curObj[c4d.LIGHT_TYPE]==0:
+                lightType=0
+            if curObj[c4d.LIGHT_TYPE]==3:
+                lightType=1
+            if lightType is not None:
+                newAWDBlock=classesAWDBlocks.LightBlock(exportData.idCounter,0,curObj,lightType)
+                exportData.IDsToAWDBlocksDic[str(exportData.idCounter)]=newAWDBlock
+                exportData.allAWDBlocks.append(newAWDBlock)
+                exportData.allSceneObjects.append(newAWDBlock)
+                newAWDBlock.name=curObj.GetName()
+                newAWDBlock.tagForExport=tagForExport
+                exportData.allLightBlocks.append(newAWDBlock)
+                curObj.SetName(str(exportData.idCounter))
+                exportData.idCounter+=1
+                if exportData.unusedMats==True:
+                    newAWDBlock.tagForExport=True
+                #mainLightRouting.read_light_routing(curObj,exportData)
+                #if len(curObj.GetChildren())==0:
+                #    return False, False
+                return True, True
         
         if curObj.GetType() == c4d.Ocamera:
             if len(curObj.GetChildren())==0:

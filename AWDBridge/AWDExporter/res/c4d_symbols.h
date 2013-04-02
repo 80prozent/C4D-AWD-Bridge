@@ -19,6 +19,8 @@ enum
     MENU_ABOUT_HELP_DIALOG                = 20203,
     MENU_ABOUT_ABOUT_DIALOG                 = 20204,
 	
+    
+
     // maindialog
     MAINDIALOG                      = 20000,
     MAINDIALOG_STR,    
@@ -40,8 +42,10 @@ enum
 	CBOX_ANIMATION						= 41014,
 	CBOX_STREAMING				        = 41037,
 	CBOX_DEBUG				            = 41038,
-	CBOX_COPYTEX				        = 41039,
+    CBOX_EXPORTLIGHTXML                 = 41017,
 	
+    CBOX_LIGHTMATERIALS				    = 41039,
+    CBOX_UNSUPPORTETTEX				    = 41041,
     CBOX_OPENPREFAB        			    = 41016,
 
     MAINDIALOG_USERAREA				    = 41040,

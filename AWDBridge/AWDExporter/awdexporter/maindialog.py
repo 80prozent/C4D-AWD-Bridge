@@ -6,7 +6,6 @@ from awdexporter import mainHelpers
 from awdexporter import classCanvas
 from awdexporter import mainExporter
 
-from awdexporter import maindialogPresets
 from awdexporter import maindialogHelpers
 from awdexporter import mainSkeletonHelper
 from awdexporter import maindialogCreator
@@ -84,6 +83,9 @@ class MainDialog(c4d.gui.GeDialog):
     animationBool = False
     animationRange = int(0)
     openInPreFab = False
+    exportSceneLights = False
+    exportExtraMats = False
+    exportUnsupportedTex = False
         
     def __init__(self): 
         doc=c4d.documents.GetActiveDocument()
@@ -110,8 +112,8 @@ class MainDialog(c4d.gui.GeDialog):
 
                 
     def CoreMessage(self, msg, result):
-        if msg==c4d.EVMSG_BROWSERCHANGE:
-            print "JA"
+        #if msg==c4d.EVMSG_BROWSERCHANGE:
+            #print "JA"
         mainHelpers.updateCanvas(self,exportData)#update the status-canvas
         doc=c4d.documents.GetActiveDocument()
         if doc:
@@ -152,7 +154,7 @@ class MainDialog(c4d.gui.GeDialog):
                     exportData=None                                                             # destroy the exportData-object
                     mainHelpers.updateCanvas(self,exportData)                                   # and update the status-canvas
         if self.workerAction == "meshChecking":
-            print "worker2"
+            pass#print "worker2"
 
 
     # this function will be executed every time a GUI-Element is changed by the user
@@ -206,17 +208,18 @@ class MainDialog(c4d.gui.GeDialog):
                 c4d.gui.MessageDialog(newMessage)
                 return True
             
-            exportData=mainExporter.startExport(self,doc)       # start the export-process thats done in the c4d-main-Thread         
-            mainHelpers.printErrors(self,exportData)                              # if any errors occured, print them out and delete the "exportData"-object
-            if exportData!=None:                            # if the exportData object is still alive, no error has occured
+            exportData=mainExporter.startExport(self,doc)       # start the export-process thats done in the c4d-main-Thread                     
+            if exportData is not None:                            # if the exportData object is still alive, no error has occured
+                mainHelpers.printErrors(self,exportData)                              # if any errors occured, print them out and delete the "exportData"-object
                 workerThread  = WorkerThread()                  # recreated the workerThread (open a new c4d-thread for the heavy mesh-processing)
                 workerThread.Start()                            # start the workerThread
                 self.SetTimer(20)                               # start the timer-function to monitor the workerThread
-            if exportData==None:                            # if the export data is not alive, a error has occured
+            if exportData is None:                            # if the export data is not alive, a error has occured
                 self.SetTimer(0)                                # stop the timer-function
               
         if id == ids.CBOX_ANIMATION: 
             self.animationBool=self.GetBool(ids.CBOX_ANIMATION)
+            maindialogHelpers.setUI(self)  
         if id == ids.CBOX_CLOSEAFTEREXPORT: 
             self.closeAfter=self.GetBool(ids.CBOX_CLOSEAFTEREXPORT)
         if id == ids.CBOX_UNUSEDMATS: 
@@ -258,11 +261,16 @@ class MainDialog(c4d.gui.GeDialog):
             #dlg.Open(dlgtype=c4d.DLG_TYPE_MODAL, defaultw=300, defaulth=300)
             
         if id == ids.MENU_ABOUT_HELP: 
-            pass#dlg = HelpDialog()
+            realPath= os.path.abspath(os.path.join(os.path.dirname(__file__),".."))
+            helpPath=os.path.join(realPath, "res",  "Help","index.html")
+            c4d.storage.GeExecuteFile(helpPath)
+            print helpPath
+            #pass#dlg = HelpDialog()
             #DLG_TYPE_MODAL = > synchronous dialog
             #DLG_TYPE_ASYNC = > asynchronous dialogs
             #dlg.Open(dlgtype=c4d.DLG_TYPE_ASYNC, defaultw=400, defaulth=400)
                  
+        maindialogHelpers.setValues(self)   
         return True  
     
     """

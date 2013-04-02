@@ -22,7 +22,7 @@ def createSkeletonBlocks(objList,exportData,mainDialog):
         if skeletonAnimationTag is not None:                        # if a "SkeletonAnimationTag" is found:
             if skeletonAnimationTag[1010]==True:                        # if the "SkeletonAnimationTag" is enabled for export:
                 if skeletonAnimationTag[1011] is not None:                  # if the "SkeletonAnimationTag"-Name is not None:
-                    buildSkeletonAnimation(exportData,object,mainDialog)        # build the SkeletonAnimationBlock
+                    buildSkeletonAnimation(exportData,object,mainDialog,skeletonAnimationTag)        # build the SkeletonAnimationBlock
         if len(object.GetChildren())>0:                             # if the object has any Children:
             createSkeletonBlocks(object.GetChildren(),exportData,mainDialog)# execute this function again, passing the children as objList
 
@@ -62,12 +62,36 @@ def buildSkeletonJoint(jointObjs,jointList,parentID,exportData,skeletonBlock):
             buildSkeletonJoint(jointObj.GetChildren(),jointList,parentID2,exportData,skeletonBlock) # execute the function for the childs 
 
 # build a skeletonAnimationBlock
-def buildSkeletonAnimation(exportData,curObj,mainDialog):   
-    minFrame=mainDialog.GetReal(ids.REAL_FIRSTFRAME)                                                            # get the first frame of the animation range
-    maxFrame=mainDialog.GetReal(ids.REAL_LASTFRAME)                                                           # get the last frame of the animation range
+def buildSkeletonAnimation(exportData,curObj,mainDialog,skeletonAnimationTag):   
+    globalMinFrame=mainDialog.GetReal(ids.REAL_FIRSTFRAME)                                                            # get the first frame for the global animation range 
+    globalMaxFrame=mainDialog.GetReal(ids.REAL_LASTFRAME)                                                           # get the last frame for the global animation range
+    minFrame=globalMinFrame                                                         # set the minFrame to the global minFrame
+    maxFrame=globalMaxFrame                                                         # set the maxFrame to the global maxFrame
+    animationRange=skeletonAnimationTag[1015]                                       # get the range mode of the current Animation
+    if animationRange!=1021:                                                        # if it is not set to "Global" we update the minframe/maxFrame using the skeletonAnmiationTags input values
+        minFrame=skeletonAnimationTag[1018]
+        maxFrame=skeletonAnimationTag[1020]
+        
+    #print "Start Exporting Animation Range = "+str(minFrame)+"  -  "+str(maxFrame)
+    
     curFrame=minFrame                                                                                           # set the first frame to be the current frame
     durationList=[]                                                                                             # list to store all frame-durations
-    idList=[]                                                                                                   # list to store all frame-IDs
+    idList=[]  
+    if skeletonAnimationTag[1021]==True:    
+        keyLength=maxFrame-minFrame                                                                      # get the curve for this track
+        keyCounter=0   
+        keyTime=minFrame*(float(1000/exportData.doc.GetFps())/1000)
+        durationTime=(float(1000/exportData.doc.GetFps())/1000)
+        while keyCounter<keyLength: 
+            durationList.append(durationTime)
+            keyTime+=durationTime
+            newTime=c4d.BaseTime(keyTime)
+            newTime.Quantize(exportData.doc.GetFps())
+            idList.append(buildSkeletonPose(exportData,curObj,newTime))
+            keyCounter+=1
+        buildSkeletonAnimationBlock(exportData,curObj,durationList,idList) 
+        return 
+        # list to store all frame-IDs
     track=curObj.GetFirstCTrack()                                                                               # get the first track of the curObj
     if track==None:                                                                                             # if no track is found
         durationList.append(1*exportData.doc.GetFps())                                                              # set only one duration
@@ -77,9 +101,7 @@ def buildSkeletonAnimation(exportData,curObj,mainDialog):
     curve=track.GetCurve()                                                                                 # get the curve for this track
     keyCounter=0   
     keyCount=curve.GetKeyCount()  
-    print keyCount                                                                              # get key-Count of the Curve
-    lastDuration=0
-    lastPose=None
+    #print keyCount     
     firstKeyTime=None
     while keyCounter<keyCount:                                                                                  # iterate over the keyCount
         key=curve.GetKey(keyCounter)                                                                            # get a key   
@@ -95,13 +117,16 @@ def buildSkeletonAnimation(exportData,curObj,mainDialog):
             if (keyCounter+1)<keyCount:# if this is not the last key, we calculate the duration-time like this: durationTime = nextKeyTime - thisKeyTime
                 durationList.append(float(curve.GetKey(keyCounter+1).GetTime().Get())-float(keyTime.Get()))
             if (keyCounter+1)>=keyCount:# if this is the last keyframe within the range, we set its duration 
-                durationList.append((1000/exportData.doc.GetFps())/1000)#100*(1000/exportData.doc.GetFps()))
+                endDuration=float(maxFrame*float(1000/exportData.doc.GetFps())/float(1000))-float(keyTime.Get())
+                if endDuration<=0:
+                    endDuration=0
+                durationList.append(endDuration)#100*(1000/exportData.doc.GetFps()))
             idList.append(buildSkeletonPose(exportData,curObj,keyTime))
         keyCounter+=1
     if firstKeyTime is not None:
-        durationList.append((1000/exportData.doc.GetFps())/1000)
-        print durationList
-        idList.append(buildSkeletonPose(exportData,curObj,firstKeyTime))
+        #durationList.append((1000/exportData.doc.GetFps())/1000)
+        pass#print durationList
+        #idList.append(buildSkeletonPose(exportData,curObj,firstKeyTime))
     buildSkeletonAnimationBlock(exportData,curObj,durationList,idList)                                          # create the SkeletonAnimationBlock 
 
 def buildSkeletonAnimationBlock(exportData,curObj,durationList,idList):   
@@ -123,7 +148,6 @@ def buildSkeletonPose(exportData,curObj,curTime):
     newAWDBlock.name=curObj.GetTag(1028938)[1011]
     exportData.idCounter+=1
     newAWDBlock.tagForExport=True
-    print "MatrixOFF= "+str(curObj.GetName())+" / "+str(curTime.Get())
     c4d.documents.SetDocumentTime(exportData.doc, curTime)# set original Time
     c4d.DrawViews( c4d.DRAWFLAGS_FORCEFULLREDRAW|c4d.DRAWFLAGS_NO_THREAD|c4d.DRAWFLAGS_NO_REDUCTION|c4d.DRAWFLAGS_STATICBREAK )
     c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
@@ -143,7 +167,6 @@ def buildJointTransform(curObjList,jointTransforms,exportData,firstJoint):
         if firstJoint==True:
             newMatrix=curObj.GetMg()
         newMatrix.off=newMatrix.off*exportData.scale
-        print "MatrixOFF= "+str(curObj.GetName())+" / "+str(newMatrix.off)
         jointTransforms.append(newMatrix)
         if len(curObj.GetChildren())>0:
             buildJointTransform(curObj.GetChildren(),jointTransforms,exportData,False)

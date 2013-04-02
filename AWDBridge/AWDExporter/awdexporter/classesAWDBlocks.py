@@ -29,7 +29,6 @@ class BaseBlock(object):# baseclass for all blocks - not to be instanced directl
         outputBits+=struct.pack("< B",self.blockType)
         outputBits+=struct.pack("< B",self.blockFlags)
         if exportData.debug==True:
-            print "_"
             print "Exported Block:     BlockID= "+str(self.saveBlockID)+" NameSpcae= "+str(self.nameSpace)+" blockType= "+str(self.blockType) 
         return outputBits
 
@@ -57,17 +56,10 @@ class BaseSceneContainerBlock(BaseBlock):# baseclass for sceneObjects - not to b
 class TriangleGeometrieBlock(BaseBlock):
     def __init__(self,blockID=0,nameSpace=0,sceneObject=None):
         super(TriangleGeometrieBlock, self ).__init__(blockID,nameSpace,1)
-        self.sceneObject = sceneObject
-        c4d.documents.GetActiveDocument().SetActiveObject(sceneObject)
-        self.copiedMesh = self.sceneObject.GetClone()
-        c4d.documents.GetActiveDocument().InsertObject(self.copiedMesh,sceneObject.GetUp(),sceneObject)
-        c4d.documents.GetActiveDocument().SetActiveObject(self.copiedMesh)   
-        c4d.CallCommand(14048)
-        c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-        c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-        c4d.EventAdd(c4d.EVENT_ANIMATE)
+        self.sceneObject=sceneObject
+        self.sceneBlocks=[]
         self.isSkinned=False
-        self.polygonObject = None
+        self.polygonObjects = []
         self.allJointIndexe = []
         self.allJointWeights = []
         self.numJoints = []
@@ -77,7 +69,6 @@ class TriangleGeometrieBlock(BaseBlock):
         self.minJointIndex = []
         self.SubmeshPointCount = []
         self.SubmeshTrisCount = []
-        #self.copiedMesh = None
         self.pointsUsed = []
         self.pointsUsed = []
         self.weightTag=None
@@ -127,8 +118,10 @@ class MeshInstanceBlock(BaseSceneContainerBlock):
         super(MeshInstanceBlock, self ).__init__(blockID,nameSpace,sceneObject,23)
         self.geoBlockID=geoBlockID
         self.geoObj=None
+        self.lightPickerIdx=None
         self.saveMaterials=[]
         self.saveMaterials2=[]
+        self.isRenderInstance=False#if this is true, the meshInstance in c4d is a instanceObject set to be a renderInstance e.g. uses same displaymaterials as reference
     def writeBinary(self,exportData):
         baseBlockBytes,sceneBlockBytes=super(MeshInstanceBlock, self).writeBinary(exportData)
         sceneBlockBytes+=struct.pack("< I",self.geoBlockID)
@@ -143,10 +136,10 @@ class MeshInstanceBlock(BaseSceneContainerBlock):
         return baseBlockBytes+struct.pack("< I",len(sceneBlockBytes))+sceneBlockBytes
 
 class LightBlock(BaseSceneContainerBlock):
-    def __init__(self,blockID=0,nameSpace=0,sceneObject=None):
+    def __init__(self,blockID=0,nameSpace=0,sceneObject=None,lightType=None):
         super(LightBlock, self ).__init__(blockID,nameSpace,sceneObject,41)
         self.name = "undefined"
-        self.lightType = 1
+        self.lightType = lightType
         self.lightProps = []
         self.nearRadius = 0.0
         self.farRadius = 0.0
@@ -206,10 +199,12 @@ class StandartMaterialBlock(BaseBlock):
         self.matType = 0
         self.numShadingMethods = 0
         self.materialProperties = None
+        self.mat = None
         self.shaderMethods = []
         self.colorTextureID = None
         self.userAttributes = None
         self.colorMat = colorMat
+        self.isCreated = False
 
         self.saveLookUpName = ""
         self.saveMatType = 1
@@ -245,29 +240,25 @@ class StandartMaterialBlock(BaseBlock):
                 materialBAttributesBytes+=struct.pack("< H",matProperty)
                 materialBAttributesBytes+=struct.pack("< I",4)
                 materialBAttributesBytes+=struct.pack("< f",self.matAlpha)
-            #materialBAttributesBytes+=struct.pack("< H",matProperty.propID)
-            #materialBAttributesBytes+=struct.pack("< H",matProperty.propID)
 
         materialBlockBytes+=struct.pack("< I",len(materialBAttributesBytes))+str(materialBAttributesBytes)
-        #materialBlockBytes+=struct.pack("< I",len(self.saveMatProps))
-        #materialBlockBytes+=struct.pack("< I",len(self.saveShaders))
         materialBlockBytes+=struct.pack("< I",len(self.saveMatAtts))
         return baseBlockBytes+struct.pack("< I",len(materialBlockBytes))+materialBlockBytes
 
 class TextureBlock(BaseBlock):
+
     def __init__(self,blockID=None,nameSpace=None,c4dfilePath=None,saveIsEmbed=0,saveFileName=None):
         super(TextureBlock, self ).__init__(blockID,nameSpace,82)
         self.c4dfilePath = c4dfilePath
         if saveIsEmbed==0:
             self.saveIsEmbed = 1
         if saveIsEmbed==1:
-            self.saveIsEmbed = 0
-
-        
+            self.saveIsEmbed = 0        
         self.saveFileName = saveFileName
         self.saveTextureProps=[]
         self.saveTextureAtts=[]
         self.saveTextureData=None
+        
     def writeBinary(self,exportData):
         baseBlockBytes=super(TextureBlock, self).writeBinary(exportData)
         textureBlockBytes=struct.pack("< H",len(self.saveLookUpName))+str(self.saveLookUpName)
@@ -277,10 +268,8 @@ class TextureBlock(BaseBlock):
             textureBlockBytes+=struct.pack("< I",len(textureData))+textureData
         if self.saveIsEmbed==1 or self.saveIsEmbed==2:
             textureBlockBytes+=struct.pack("< I",len(self.saveTextureData))+self.saveTextureData
-
         textureBlockBytes+=struct.pack("< I",len(self.saveTextureProps))
         textureBlockBytes+=struct.pack("< I",len(self.saveTextureAtts))
-        #print "external texture2"
         return baseBlockBytes+struct.pack("< I",int(len(textureBlockBytes)))+textureBlockBytes
 
 class CubeTextureBlock(BaseBlock):
@@ -400,11 +389,11 @@ class MetaDataBlock(BaseBlock):
 		
 class BaseAttribute(object):
     def __init__(self):
-        tester=0
-        tesere=2
-        while tester<tesere:
-            print tester
-            tester+=1
+        #tester=0
+        #tesere=2
+        #while tester<tesere:
+            #print tester
+        #    tester+=1
         self.attributeID = 0
         self.attributeValue = None
 

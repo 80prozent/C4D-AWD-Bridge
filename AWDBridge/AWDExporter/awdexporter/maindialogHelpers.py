@@ -12,6 +12,10 @@ def InitValues(mainDialog):
 
         if mainDialog.awdExporterData[ids.REAL_SCALE]:
             mainDialog.scale = mainDialog.awdExporterData[ids.REAL_SCALE]
+        if mainDialog.awdExporterData[ids.CBOX_LIGHTMATERIALS]:
+            mainDialog.exportExtraMats = mainDialog.awdExporterData[ids.CBOX_LIGHTMATERIALS]
+        if mainDialog.awdExporterData[ids.CBOX_UNSUPPORTETTEX]:
+            mainDialog.exportUnsupportedTex = mainDialog.awdExporterData[ids.CBOX_UNSUPPORTETTEX]
         if mainDialog.awdExporterData[ids.CBOX_UNUSEDMATS]:
             mainDialog.unusedMats = mainDialog.awdExporterData[ids.CBOX_UNUSEDMATS]
         if mainDialog.awdExporterData[ids.CBOX_STREAMING]:
@@ -34,6 +38,8 @@ def InitValues(mainDialog):
             mainDialog.lastFrameUser = mainDialog.awdExporterData[ids.REAL_LASTFRAME]
         if mainDialog.awdExporterData[ids.CBOX_OPENPREFAB]:
             mainDialog.openInPreFab = mainDialog.awdExporterData[ids.CBOX_OPENPREFAB]
+        if mainDialog.awdExporterData[ids.CBOX_EXPORTLIGHTXML]:
+            mainDialog.exportSceneLights = mainDialog.awdExporterData[ids.CBOX_EXPORTLIGHTXML]
     else:
         mainDialog.awdExporterData = c4d.BaseContainer()
     setUI(mainDialog)
@@ -41,12 +47,15 @@ def InitValues(mainDialog):
 
 def setUI(mainDialog):
     mainDialog.SetReal(ids.REAL_SCALE, mainDialog.scale, 0.001, 99999999, 1.0, c4d.FORMAT_REAL)
+    mainDialog.SetBool(ids.CBOX_LIGHTMATERIALS, mainDialog.exportExtraMats)
+    mainDialog.SetBool(ids.CBOX_UNSUPPORTETTEX, mainDialog.exportUnsupportedTex)
     mainDialog.SetBool(ids.CBOX_UNUSEDMATS, mainDialog.unusedMats)
     mainDialog.SetBool(ids.CBOX_STREAMING, mainDialog.streaming)
     mainDialog.SetBool(ids.CBOX_COMPRESSED, mainDialog.compressData)
     mainDialog.SetBool(ids.CBOX_DEBUG, mainDialog.debug)
     mainDialog.SetBool(ids.CBOX_CLOSEAFTEREXPORT, mainDialog.closeAfter)
     mainDialog.SetBool(ids.CBOX_OPENPREFAB, mainDialog.openInPreFab)
+    mainDialog.SetBool(ids.CBOX_EXPORTLIGHTXML, mainDialog.exportSceneLights)
     mainDialog.SetBool(ids.CBOX_ANIMATION, mainDialog.animationBool)
 
     mainDialog.SetLong(ids.COMBO_TEXTURESMODE, mainDialog.textures)
@@ -86,10 +95,16 @@ def setUI(mainDialog):
     
     
 def setValues(mainDialog):
+    mainDialog.exportExtraMats=mainDialog.GetBool(ids.CBOX_LIGHTMATERIALS)
+    mainDialog.awdExporterData.SetBool(ids.CBOX_LIGHTMATERIALS, mainDialog.exportExtraMats)
+    mainDialog.exportUnsupportedTex=mainDialog.GetBool(ids.CBOX_UNSUPPORTETTEX)
+    mainDialog.awdExporterData.SetBool(ids.CBOX_UNSUPPORTETTEX, mainDialog.exportUnsupportedTex)
     mainDialog.scale=mainDialog.GetReal(ids.REAL_SCALE)
     mainDialog.awdExporterData.SetReal(ids.REAL_SCALE, mainDialog.scale)
     mainDialog.openInPreFab=mainDialog.GetBool(ids.CBOX_OPENPREFAB)
     mainDialog.awdExporterData.SetBool(ids.CBOX_OPENPREFAB, mainDialog.openInPreFab)
+    mainDialog.exportSceneLights=mainDialog.GetBool(ids.CBOX_EXPORTLIGHTXML)
+    mainDialog.awdExporterData.SetBool(ids.CBOX_EXPORTLIGHTXML, mainDialog.exportSceneLights)
     mainDialog.unusedMats=mainDialog.GetBool(ids.CBOX_UNUSEDMATS)
     mainDialog.awdExporterData.SetBool(ids.CBOX_UNUSEDMATS, mainDialog.unusedMats)
     mainDialog.streaming=mainDialog.GetBool(ids.CBOX_STREAMING)
@@ -110,8 +125,8 @@ def setValues(mainDialog):
     if mainDialog.GetLong(ids.COMBO_RANGE)==2:
         mainDialog.firstFrameUser=mainDialog.GetReal(ids.REAL_FIRSTFRAME)
         mainDialog.lastFrameUser=mainDialog.GetReal(ids.REAL_LASTFRAME)
-        mainDialog.awdExporterData.SetReal(ids.REAL_FIRSTFRAME, mainDialog.firstFrameUser)
-        mainDialog.awdExporterData.SetReal(ids.REAL_LASTFRAME, mainDialog.lastFrameUser)  
+    mainDialog.awdExporterData.SetReal(ids.REAL_FIRSTFRAME, mainDialog.firstFrameUser)
+    mainDialog.awdExporterData.SetReal(ids.REAL_LASTFRAME, mainDialog.lastFrameUser)  
 
     c4d.plugins.SetWorldPluginData(ids.PLUGINID, mainDialog.awdExporterData)  
 
@@ -121,8 +136,16 @@ def enableAll(mainDialog, enableBool):
     mainDialog.Enable(ids.CBOX_COMPRESSED, enableBool)
     mainDialog.Enable(ids.CBOX_ANIMATION, enableBool)
     mainDialog.Enable(ids.BTN_EXPORT, enableBool)
+    mainDialog.Enable(ids.BTN_SAVEWITHASSETS, enableBool)
+    mainDialog.Enable(ids.BTN_CHECKSKELETON, enableBool)
+    mainDialog.Enable(ids.BTN_CREATESKELETONANIMATION, enableBool)
     mainDialog.Enable(ids.CBOX_OPENPREFAB, enableBool)       
+    mainDialog.Enable(ids.CBOX_EXPORTLIGHTXML, enableBool)      
+    mainDialog.Enable(ids.CBOX_LIGHTMATERIALS, enableBool)       
+    mainDialog.Enable(ids.CBOX_UNSUPPORTETTEX, enableBool)       
         
+        
+    mainDialog.Enable(ids.GRP_TEXTURES, enableBool)
     mainDialog.Enable(ids.CBOX_UNUSEDMATS, enableBool)
     mainDialog.Enable(ids.CBOX_STREAMING, enableBool)
     mainDialog.Enable(ids.CBOX_DEBUG, enableBool)

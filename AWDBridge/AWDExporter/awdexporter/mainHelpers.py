@@ -5,6 +5,8 @@ from awdexporter import ids
 from awdexporter import classesHelper
 from awdexporter import maindialogHelpers
 
+
+
 def checkforValidSelectedSkeleton():     
     doc=c4d.documents.GetActiveDocument()       # we check if a C4D-document is open
     if doc is not None:
@@ -40,7 +42,7 @@ def copySkeletonAndApplySkeletonAnimation(curObj):
     
 def deleteCopiedMeshes(meshBlockList):
     for meshBlock in meshBlockList:            
-        meshBlock.copiedMesh.Remove()
+        pass#meshBlock.copiedMesh.Remove()
         
 def printErrors(mainDialog,exportData):  
     if len(exportData.AWDerrorObjects)>0:  
@@ -68,12 +70,12 @@ def printErrors(mainDialog,exportData):
 
 def updateCanvas(mainDialog,exportData):
     doc=c4d.documents.GetActiveDocument()
-    if doc==None:
+    if doc is None:
         statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
         mainDialog.userarea.draw([statusStr,0,0])
         return
-    if doc!=None:
-        if doc.GetDocumentPath()==None or doc.GetDocumentPath()=="":
+    if doc is not None:
+        if doc.GetDocumentPath() is None or doc.GetDocumentPath()=="":
             statusStr=c4d.plugins.GeLoadString(ids.STATUSMESSAGE)+c4d.plugins.GeLoadString(ids.STATUSMESSAGE1)
             mainDialog.userarea.draw([statusStr,0,0])
             return
@@ -104,22 +106,22 @@ def updateCanvas(mainDialog,exportData):
 # i think this could be removed
 def resetAllObjectsAtBeginning(objList=None):
     for curObj in objList:
-        if curObj.GetTag(c4d.Tweights):#	reset morphtags
-            c4d.documents.GetActiveDocument().SetActiveObject(curObj)
-            c4d.CallCommand(1019937)
-            c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
-            c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-            c4d.documents.GetActiveDocument().SetTime(c4d.documents.GetActiveDocument().GetTime())
-            c4d.EventAdd(c4d.EVENT_ANIMATE)
+        #if curObj.GetTag(c4d.Tweights):#	
+            #c4d.documents.GetActiveDocument().SetActiveObject(curObj)
+            #c4d.CallCommand(1019937)
+            #c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
+            #c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
+            #c4d.documents.GetActiveDocument().SetTime(c4d.documents.GetActiveDocument().GetTime())
+            #c4d.EventAdd(c4d.EVENT_ANIMATE)
         if curObj.GetTag(c4d.Tposemorph):#	reset morphtags
             all_tags=curObj.GetTags()#get all tags applied to object
             for morphtag in all_tags:#do for each tag:
                 if morphtag.GetType()==c4d.Tposemorph:#do if the tag is a morphtag
                     if morphtag.GetMode()==1:#do if the tag is in animation-mode:
-                        c4d.documents.GetActiveDocument().SetTime(c4d.BaseTime(0, c4d.documents.GetActiveDocument().GetFps()))
+                        exportData.doc.SetTime(c4d.BaseTime(0, exportData.doc.GetFps()))
                         c4d.DrawViews( c4d.DA_ONLY_ACTIVE_VIEW|c4d.DA_NO_THREAD|c4d.DA_NO_REDUCTION|c4d.DA_STATICBREAK )
                         c4d.GeSyncMessage(c4d.EVMSG_TIMECHANGED)
-                        c4d.documents.GetActiveDocument().SetTime(c4d.documents.GetActiveDocument().GetTime())
+                        exportData.doc.SetTime(exportData.doc.GetTime())
                         c4d.EventAdd(c4d.EVENT_ANIMATE)
                         for track in morphtag.GetCTracks():
                             curve = track.GetCurve()

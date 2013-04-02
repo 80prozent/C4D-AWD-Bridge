@@ -13,7 +13,9 @@ from awdexporter import classesHelper
 
 class mainScene(object):
     def __init__(self, doc,mainDialog):
-        self.doc = doc
+    
+        self.idCounter = 0  # will count the ids of the awdBlocks.
+        self.doc = doc 
         self.name = doc.GetDocumentName()
         self.fps = doc.GetFps()
         self.animationCounter=0
@@ -21,6 +23,7 @@ class mainScene(object):
         self.allStatus = 0
         self.subStatus = 0
         self.status = 0
+        self.useInsteadSubMeshDic = {}# used to translate between 
         self.scale = mainDialog.GetReal(ids.REAL_SCALE)
         self.firstFrame=mainDialog.GetReal(ids.REAL_FIRSTFRAME)
         self.lastFrame=mainDialog.GetReal(ids.REAL_LASTFRAME)
@@ -28,17 +31,22 @@ class mainScene(object):
         self.debug=mainDialog.GetBool(ids.CBOX_DEBUG)        
         self.embedTextures=mainDialog.GetLong(ids.COMBO_TEXTURESMODE)        
         self.openPrefab=mainDialog.GetBool(ids.CBOX_OPENPREFAB)
+        self.exportLightXML=mainDialog.GetBool(ids.CBOX_EXPORTLIGHTXML)
+        self.exportExtraMats=mainDialog.GetBool(ids.CBOX_LIGHTMATERIALS)
+        self.exportUnsupportedTextures=mainDialog.GetBool(ids.CBOX_UNSUPPORTETTEX)
         
         # store the current selected objects/tags/materials, so we can restore the selection after export
         self.originalActiveObjects = doc.GetActiveObjects(True)
         self.originalActiveTags = doc.GetActiveTags()
         self.originalActiveMaterials = doc.GetActiveMaterials()
         
-        self.allc4dMaterials = doc.GetMaterials() # get all Materials found in the document
+        self.originalTime=doc.GetTime()#store the original play position
+        self.storeEditMode=doc.GetMode()#store the current EditMode
+        self.allc4dMaterials = doc.GetMaterials() # get all Materials found in the document        
         
-        self.externalFilePath=""
+        self.datei="" # the path to the output-file. will be set at beginning of export by Saveas-Dialog, so we have the Output-Path to export lightXML and textures to
         	
-        # define the infos needed for the AWD-File-Header     
+        # define the some infos needed for the AWD-File-Header     
         self.headerMagicString = "AWD"
         self.headerVersionNumberMajor = 0
         self.headerVersionNumberMinor = 0           
@@ -49,73 +57,36 @@ class mainScene(object):
         if mainDialog.GetBool(ids.CBOX_COMPRESSED)==True:
             self.headerCompressionType=1
         
+        self.AWDerrorObjects = [] # if a error occurs, a error-object will be added to this list, and the export-process will be ended. on end of export, this errors will be printed out
+        self.AWDwarningObjects = [] # if a warning occurs, a warning-object will be added to this list. on end of export, this warning will be printed out
+        
+        self.allSaveAWDBlocks = [] # this wll contain all awdBlocks in the correct order, ready for export
+        self.allAWDBlocks = [] # this wll contain all awdBlocks, even the ones that will not be exported
+        
+        self.unconnectedInstances = [] # a list of all meshinstancesBlocks, so we can loop trough them and connect them to the correct geometryBlock, after all awdBlocks have been created
         
         self.jointIDstoJointBlocks = {} # dictionary to find a JointBlock using a joints ID
         self.jointIDstoSkeletonBlocks = {} # dictionary to find a SkeletonBlock using a joints ID
+        self.allSkeletonBlocks = []   # a list of all skeletionBlocks that should be exported  
+        self.allSkeletonAnimations = []  # a list of all allSkeletonAnimations that should be exported
         
-        #texturesURL=mainDialog.GetString(ids.LINK_EXTERNTEXTURESPATH)
-        #if texturesURL!=None:
-            #self.externalFilePath=texturesURL	
-					
-        self.IDsToAWDBlocksDic = {}                
-        self.texturePathToAWDBlocksDic = {}        
-        self.MaterialsToAWDBlocksDic = {}
-        self.objectsIDsDic = {}
-        self.skeletonIDsDic = {}
-        self.meshIDsDic = {}
-        self.lightsIDsDic = {}
-        self.materialsIDsDic = {}
-        self.cameraIDsDic = {}
-        self.texturesIDsDic = {}   
-        self.allObjectsDic = {}
-        self.unusedIDsDic = {}   
-        self.blockDic = {}    
-        self.geoDic = {}    
-        self.texDic = {}    
-        self.materialsDic = {}   
-
-        self.allMatBlocks = []
-        self.objList = []
-        self.allSaveAWDBlocks = []
-        self.allAWDBlocks = []
-        self.allc4dObjects = []
-        self.allUsedc4dMaterials = []
-        self.AWDerrorObjects = []
-        self.AWDwarningObjects = []
-        self.errorMessages=[0]
-        self.unconnectedInstances = []
-        self.allSceneObjects = []
+        self.lightPickerDic = {}  # dictionary to makes shure only one LightPicker is created for each combination of Lights 
+        self.lightPickerList = [] # will contain all LightPickers - LightPicker are no AWDBlocks, but simple classes containing a name and a list of light-indicies (allAWDBlocks[lightIndex]=lightBlock)
+        
+        self.allLights = []   # a list of all lights, used by mainLightRouting
+        
+        self.defaultObjectSettings = 0    
+        
+        self.unsupportedTextures=[] # will contain a list of exported but unsupported textures, for every texture it should contain the infos about channel and material too
+        self.texturePathToAWDBlocksDic = {}  # dictionary to translate a filePath to a AWDTextureBlock, to make shure we only save one TextureBlock for each Texture-Path
+   
+        self.colorMaterials = {} # dictionary to make shure for each object-color exists onyl one material 
+        self.allMatBlocks = [] # not really needed?
+        self.IDsToAWDBlocksDic = {} # not really needed?
         self.allMeshObjects = []
-        self.allSkeletonBlocks = []
-        self.allMaterialsNames = []
-        self.allMaterialsBlockIDS = []
-        self.allMaterials = []
-        self.reorderedAWDBlockss = []
-        self.settings = []
         self.allSceneObjects = []
-        self.allGeometries = []
-        self.allSkeletons = []
-        self.allSkeletonAnimations = []
-        self.allAnimations = []
-        self.allLightPickers = []
-        self.allTextures = []   
-        self.allMaterials = []   
-        self.allAnimations = []
-
-        self.saveTexturesEmbed = True
-        self.cancel=False
-        self.parsingOK=False
-		
-        self.bodyLength=0
-        self.path = ""
-
-        self.idCounter = 0
-        self.defaultObjectSettings = 0
-
-        self.texturesExternPathMode = 0  
-        self.texturesEmbedPathMode = 0  
-        self.texturesExternPath = None  
-        self.texturesEmbedPath = None          
+        self.allLightBlocks = [] 
+        
   
             
 

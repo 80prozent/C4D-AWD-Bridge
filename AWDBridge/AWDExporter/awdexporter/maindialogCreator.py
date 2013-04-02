@@ -33,7 +33,7 @@ def createLayout(mainDialog):
     mainDialog.element = mainDialog.AddSeparatorH(300)
     mainDialog.GroupBegin(0,c4d.BFV_CENTER,2,1,"")
     mainDialog.GroupSpace(5,5)  
-    mainDialog.element = mainDialog.AddStaticText(0, flags=c4d.BFV_CENTER,initw=60,inith=12,name=c4d.plugins.GeLoadString(ids.REAL_SCALE_STR))
+    mainDialog.element = mainDialog.AddStaticText(ids.REAL_SCALE_STR, flags=c4d.BFV_CENTER,initw=60,inith=12,name=c4d.plugins.GeLoadString(ids.REAL_SCALE_STR))
     mainDialog.element = mainDialog.AddEditNumberArrows(ids.REAL_SCALE, flags=c4d.BFV_CENTER,initw=100,inith=14) 
                 #End Level 4
     mainDialog.GroupEnd()
@@ -56,8 +56,9 @@ def createLayout(mainDialog):
     mainDialog.GroupEnd()
     mainDialog.element = mainDialog.AddSeparatorH(300)
                     #Group Level 5
-    mainDialog.GroupBegin(0,c4d.BFH_CENTER|c4d.BFV_CENTER|c4d.BFH_SCALEFIT,1,1,"")
+    mainDialog.GroupBegin(0,c4d.BFH_CENTER|c4d.BFV_CENTER|c4d.BFH_SCALEFIT,2,1,"")
     mainDialog.element = mainDialog.AddCheckbox(ids.CBOX_OPENPREFAB, flags=c4d.BFH_CENTER|c4d.BFH_SCALEFIT, initw=30, inith=0, name=c4d.plugins.GeLoadString(ids.CBOX_OPENPREFAB))
+    mainDialog.element = mainDialog.AddCheckbox(ids.CBOX_EXPORTLIGHTXML, flags=c4d.BFH_CENTER|c4d.BFH_SCALEFIT, initw=30, inith=0, name=c4d.plugins.GeLoadString(ids.CBOX_EXPORTLIGHTXML))
                     #End Level 5
     mainDialog.GroupEnd()
     mainDialog.element = mainDialog.AddSeparatorH(300)
@@ -79,17 +80,20 @@ def createLayout(mainDialog):
     mainDialog.GroupBegin(0,c4d.BFH_CENTER|c4d.BFV_CENTER|c4d.BFH_SCALEFIT,1,2,"")
     mainDialog.GroupSpace(5,15)  
     mainDialog.element = mainDialog.AddCheckbox(ids.CBOX_UNUSEDMATS, flags=c4d.BFH_SCALEFIT, initw=30, inith=0, name=c4d.plugins.GeLoadString(ids.CBOX_UNUSEDMATS))
+    mainDialog.element = mainDialog.AddCheckbox(ids.CBOX_LIGHTMATERIALS	, flags=c4d.BFH_SCALEFIT, initw=30, inith=0, name=c4d.plugins.GeLoadString(ids.CBOX_LIGHTMATERIALS	))
     mainDialog.element = mainDialog.AddSeparatorH(300)
                 #Group Level 4
     mainDialog.GroupBegin(ids.GRP_TEXTURES, c4d.BFH_CENTER|c4d.BFV_CENTER|c4d.BFH_SCALEFIT,1,2,c4d.plugins.GeLoadString(ids.GRP_TEXTURES))
     mainDialog.GroupBorder(c4d.BORDER_BLACK) 
-    mainDialog.GroupBorderSpace(10, 5, 10, 5)
-    mainDialog.GroupSpace(20,5)   
+    mainDialog.GroupBorderSpace(10, 15, 10, 15)
+    mainDialog.GroupSpace(20,15)   
     mainDialog.element = mainDialog.AddComboBox(ids.COMBO_TEXTURESMODE,flags=c4d.BFH_SCALEFIT,initw=80, inith=0) 
     mainDialog.AddChild(ids.COMBO_TEXTURESMODE, 0, c4d.plugins.GeLoadString(ids.COMBOITEM_EMBED))
     mainDialog.AddChild(ids.COMBO_TEXTURESMODE, 1, c4d.plugins.GeLoadString(ids.COMBOITEM_EXTERNPATH))     
                 #End Level 4
+    mainDialog.element = mainDialog.AddCheckbox(ids.CBOX_UNSUPPORTETTEX, flags=c4d.BFH_CENTER|c4d.BFH_SCALEFIT, initw=30, inith=0, name=c4d.plugins.GeLoadString(ids.CBOX_UNSUPPORTETTEX))
     mainDialog.GroupEnd()
+    
     mainDialog.element = mainDialog.AddSeparatorH(300)
     #mainDialog.createButton = mainDialog.AddButton(ids.BTN_CHECKPOLY, flags=c4d.BFH_CENTER,initw=300, inith=20,name=c4d.plugins.GeLoadString(ids.BTN_CHECKPOLY))  
     #mainDialog.element = mainDialog.AddSeparatorH(300)

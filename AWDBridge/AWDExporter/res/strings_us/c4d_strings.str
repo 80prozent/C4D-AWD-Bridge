@@ -23,12 +23,15 @@ STRINGTABLE
     GRP_TEXTURES                        "Textures";
     
     CBOX_OPENPREFAB        			    "Open File in Prefab";
+    CBOX_EXPORTLIGHTXML       			"Create Prefab-Light-XML";
     CBOX_UNUSEDMATS        				"Export unused Materials";
 	CBOX_CLOSEAFTEREXPORT				"Close After Export";
 	CBOX_COMPRESSED						"Compress Data";
 	CBOX_ANIMATION						"Export Skeleton-Animation";
 	CBOX_STREAMING						"Enable Streaming";
 	CBOX_DEBUG							"Debug";	
+    CBOX_LIGHTMATERIALS				    "Export addional Materials for Light-Pickers";
+    CBOX_UNSUPPORTETTEX				    "Export Textures in unsupported Channels";
 			
     COMBOITEM_EMBED    					"Embed JPG/PNG Data";
     COMBOITEM_EXTERNPATH    			"External Files";

@@ -8,6 +8,8 @@ from c4d import documents
 from awdexporter import ids
 from awdexporter import workerMeshReader
 from awdexporter import workerHelpers
+from awdexporter import mainLightRouting
+from awdexporter import mainMaterials
 
 	
 # called after all functions running in the c4d-main-thread have been successfully executed, 
@@ -17,29 +19,52 @@ from awdexporter import workerHelpers
 # parses the AWDBlocks into Binary exportAllData
 # wirtes the file to harddisc
 def startWorkerExport(exportData,workerthreat):
-    doc=documents.GetActiveDocument()
+
     workerHelpers.connectInstances(exportData)
+    
     if workerthreat.TestBreak():
-        return            
+        return      
+        
+    for oneObj in exportData.doc.GetObjects():
+        mainLightRouting.readAllLightRouting(oneObj,exportData)   
+        
     workerHelpers.getAllObjectData(exportData)
+    
     if workerthreat.TestBreak():
-        return          
+        return   
+        
     workerMeshReader.convertMeshes(exportData.allMeshObjects,exportData,workerthreat)
+    
+    if exportData.unusedMats==True:
+        for awdBlock in exportData.allAWDBlocks:
+            if awdBlock.blockType==81:
+                if awdBlock.isCreated==False and awdBlock.colorMat==False:
+                    awdBlock.isCreated=True                
+                    mainMaterials.createMaterial(awdBlock,exportData)
+                
     if workerthreat.TestBreak():
         return          
-              
+    if exportData.exportLightXML==True:
+        mainLightRouting.saveLightXML(exportData)
     exportData.status=3
+    
     workerHelpers.reorderAllBlocks(exportData)
+    
     if workerthreat.TestBreak():
-        return          
+        return       
+        
     workerHelpers.exportAllData(exportData)
+    
     if workerthreat.TestBreak():
-        return          
+        return  
+        
     exportData.allStatus+=1
-    matidcounter=1
-    for mat in doc.GetMaterials():   
-        mat.SetName(str(exportData.allMaterialsNames[matidcounter]))
+    
+    matidcounter=2   
+    for mat in exportData.doc.GetMaterials():   
+        mat.SetName(str(exportData.allAWDBlocks[matidcounter].saveLookUpName))
         matidcounter+=1
+        
     for objBlock in exportData.allSceneObjects:   
         objBlock.sceneObject.SetName(objBlock.name)
 		
